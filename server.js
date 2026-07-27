@@ -14,6 +14,9 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use(express.static(require('path').join(__dirname, 'public')));
+app.use('/src', express.static(require('path').join(__dirname, 'src')));
+
 // ── Utilidad: Detectar y bloquear patrones de SQL Injection ──
 const SQL_INJECTION_PATTERNS = [
   /(\b(OR|AND)\b\s+\d+\s*=\s*\d+)/i,          // OR 1=1, AND 1=1
