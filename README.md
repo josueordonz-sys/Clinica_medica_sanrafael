@@ -4,7 +4,7 @@
 
 Este repositorio contiene la implementación del **Sistema de Registro y Control de Citas (SIREC)** bajo una arquitectura desacoplada **Cliente-Servidor (MVC)** con soporte **Backend as a Service (BaaS)** mediante **Firebase**.
 
-## 📂 Estructura del Proyecto
+## Estructura del Proyecto
 
 El sistema está organizado según el siguiente estándar organizativo:
 
@@ -19,7 +19,7 @@ El sistema está organizado según el siguiente estándar organizativo:
 - `src/App.js`: Orquestador y despachador del estado global del sistema.
 - `src/main.js`: Inicializador principal del ciclo de vida del DOM.
 
-## 🚀 Despliegue y Ejecución
+## Despliegue y Ejecución
 
 1. **Prueba Local**: Abra el archivo `public/index.html` en cualquier navegador web moderno.
 2. **Conexión a Firebase**: Configure sus credenciales en `src/config/firebase.js`.
