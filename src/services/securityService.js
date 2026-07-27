@@ -3,7 +3,10 @@
    Para la gestión de roles, objetos y matriz de permisos.
    ========================================================================== */
 
-const API_BASE_URL = 'http://127.0.0.1:3000/api';
+const API_ORIGIN = ['127.0.0.1:5502', '127.0.0.1:5503', 'localhost:5502', 'localhost:5503'].includes(window.location.host)
+  ? 'http://127.0.0.1:3000'
+  : '';
+const API_BASE_URL = `${API_ORIGIN}/api`;
 
 export const securityService = {
   /* ─── Roles ────────────────────────────────────────────────────────── */

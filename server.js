@@ -485,7 +485,7 @@ app.post('/api/login', async (req, res) => {
   }
 
   // Sanitización de entradas
-  email = sanitizeInput(email);
+  email = sanitizeInput(String(email).trim());
   password = sanitizeInput(password);
 
   if (email === null || password === null) {
@@ -506,7 +506,7 @@ app.post('/api/login', async (req, res) => {
       FROM EMPLEADOS e
       INNER JOIN ROLES r ON r.rol_id = e.rol_id
       LEFT JOIN ESPECIALIDADES esp ON esp.esp_id = e.esp_id
-      WHERE (e.emp_email = ? OR REPLACE(e.emp_dni, '-', '') = REPLACE(?, '-', ''))
+      WHERE (LOWER(TRIM(e.emp_email)) = LOWER(TRIM(?)) OR REPLACE(e.emp_dni, '-', '') = REPLACE(?, '-', ''))
       LIMIT 1
     `, [email, email]);
 
