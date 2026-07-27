@@ -70,12 +70,37 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+function getDatabaseConfig() {
+  const connectionUrl = process.env.DATABASE_URL || process.env.MYSQL_URL;
+  let urlConfig = {};
+
+  if (connectionUrl) {
+    try {
+      const parsedUrl = new URL(connectionUrl);
+      urlConfig = {
+        host: parsedUrl.hostname,
+        user: decodeURIComponent(parsedUrl.username),
+        password: decodeURIComponent(parsedUrl.password),
+        database: parsedUrl.pathname.replace(/^\//, ''),
+        port: Number(parsedUrl.port || 3306)
+      };
+    } catch (error) {
+      console.error('La variable DATABASE_URL/MYSQL_URL no tiene un formato valido.');
+    }
+  }
+
+  return {
+    host: process.env.DB_HOST || process.env.MYSQLHOST || process.env.MYSQL_HOST || urlConfig.host,
+    user: process.env.DB_USER || process.env.MYSQLUSER || process.env.MYSQL_USER || urlConfig.user,
+    password: process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || process.env.MYSQL_PASSWORD || urlConfig.password,
+    database: process.env.DB_NAME || process.env.MYSQLDATABASE || process.env.MYSQL_DATABASE || urlConfig.database,
+    port: Number(process.env.DB_PORT || process.env.MYSQLPORT || process.env.MYSQL_PORT || urlConfig.port || 3306)
+  };
+}
+
+const databaseConfig = getDatabaseConfig();
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: Number(process.env.DB_PORT || 3306),
+  ...databaseConfig,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -87,10 +112,31 @@ async function testDatabaseConnection() {
     await connection.ping();
     connection.release();
     console.log('Conexion a MySQL establecida correctamente.');
+    return true;
   } catch (error) {
     console.error('Error conectando a MySQL:', error.message);
+    return false;
   }
 }
+
+function isDatabaseConnectionError(error) {
+  return [
+    'ECONNREFUSED', 'ECONNRESET', 'ENOTFOUND', 'ETIMEDOUT',
+    'ER_ACCESS_DENIED_ERROR', 'ER_BAD_DB_ERROR'
+  ].includes(error?.code);
+}
+
+app.get('/api/salud', async (req, res) => {
+  try {
+    const connection = await pool.getConnection();
+    await connection.ping();
+    connection.release();
+    return res.json({ status: 'ok', database: 'connected' });
+  } catch (error) {
+    console.error('Error en comprobacion de salud de MySQL:', error.message);
+    return res.status(503).json({ status: 'error', database: 'unavailable' });
+  }
+});
 
 async function getPatientColumns(connection = pool) {
   const [rows] = await connection.execute('SHOW COLUMNS FROM PACIENTES');
@@ -2002,6 +2048,9 @@ app.post('/api/pacientes/registro', async (req, res) => {
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(409).json({ message: 'El DNI o el correo ya están registrados.' });
     }
+    if (isDatabaseConnectionError(error)) {
+      return res.status(503).json({ message: 'La base de datos no esta disponible. Intenta nuevamente en unos minutos.' });
+    }
     console.error('Error en registro de paciente:', error);
     return res.status(500).json({ message: 'Error interno registrando paciente.' });
   } finally {
@@ -2111,6 +2160,9 @@ app.post('/api/pacientes/login', async (req, res) => {
     return res.json(responseData);
   } catch (error) {
     console.error('Error en login unificado:', error);
+    if (isDatabaseConnectionError(error)) {
+      return res.status(503).json({ message: 'La base de datos no esta disponible. Intenta nuevamente en unos minutos.' });
+    }
     return res.status(500).json({ message: 'Error interno.' });
   }
 });
