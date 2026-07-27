@@ -92,19 +92,21 @@ async function testDatabaseConnection() {
   }
 }
 
-async function patientColumnExists(columnName) {
-  const [rows] = await pool.execute('SHOW COLUMNS FROM PACIENTES LIKE ?', [columnName]);
-  return rows.length > 0;
+async function getPatientColumns(connection = pool) {
+  const [rows] = await connection.execute('SHOW COLUMNS FROM PACIENTES');
+  return new Set(rows.map((row) => row.Field));
 }
 
 async function ensurePatientSchema() {
   try {
-    if (!(await patientColumnExists('pac_password'))) {
+    const columns = await getPatientColumns();
+
+    if (!columns.has('pac_password')) {
       await pool.execute('ALTER TABLE PACIENTES ADD COLUMN pac_password VARCHAR(255) DEFAULT NULL AFTER pac_email');
       console.log('Columna PACIENTES.pac_password creada correctamente.');
     }
 
-    if (!(await patientColumnExists('pac_activo'))) {
+    if (!columns.has('pac_activo')) {
       await pool.execute('ALTER TABLE PACIENTES ADD COLUMN pac_activo TINYINT(1) NOT NULL DEFAULT 1 AFTER pac_fecha_registro');
       console.log('Columna PACIENTES.pac_activo creada correctamente.');
     }
@@ -1946,35 +1948,48 @@ app.post('/api/pacientes/registro', async (req, res) => {
 
     let finalDni = dni;
     if (pacResult.length === 0) {
-      await connection.execute(`
-        INSERT INTO PACIENTES (pac_dni, pac_pnom, pac_snom, pac_pape, pac_sape, pac_fecnac, pac_sexo, pac_email, pac_tel, pac_dir, pac_tipo_sangre, pac_contacto_emergencia, pac_alergias)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `, [
-        dni,
-        primerNombre.trim(),
-        segundoNombre?.trim() || null,
-        primerApellido.trim(),
-        segundoApellido?.trim() || null,
-        fechaNacimiento,
-        genero,
-        correo?.trim() || null,
-        telefono || null,
-        direccion || null,
-        tipoSangre || 'No sabe',
-        contactoEmergencia || null,
-        alergias || null
-      ]);
+      const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+      const patientColumns = await getPatientColumns(connection);
+      const patientData = {
+        pac_dni: dni,
+        pac_pnom: primerNombre.trim(),
+        pac_snom: segundoNombre?.trim() || null,
+        pac_pape: primerApellido.trim(),
+        pac_sape: segundoApellido?.trim() || null,
+        pac_fecnac: fechaNacimiento,
+        pac_sexo: normalizeSex(genero),
+        pac_email: correo?.trim() || null,
+        pac_password: hashedPassword,
+        pac_tel: telefono || null,
+        pac_dir: direccion || null,
+        pac_tipo_sangre: tipoSangre || 'No sabe',
+        pac_contacto_emergencia: contactoEmergencia || null,
+        pac_alergias: alergias || null,
+        pac_activo: 1
+      };
+
+      if (!patientColumns.has('pac_password')) {
+        throw new Error('La tabla PACIENTES no tiene la columna pac_password.');
+      }
+
+      const insertColumns = Object.keys(patientData).filter((column) => patientColumns.has(column));
+      const placeholders = insertColumns.map(() => '?').join(', ');
+      const values = insertColumns.map((column) => patientData[column]);
+
+      await connection.execute(
+        `INSERT INTO PACIENTES (${insertColumns.join(', ')}) VALUES (${placeholders})`,
+        values
+      );
     } else {
       finalDni = pacResult[0].pac_dni;
-    }
 
-    // Actualizamos el password del PACIENTE (con hash bcrypt)
-    const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
-    await connection.execute(`
-      UPDATE PACIENTES 
-      SET pac_password = ? 
-      WHERE pac_dni = ?
-    `, [hashedPassword, finalDni]);
+      const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+      await connection.execute(`
+        UPDATE PACIENTES 
+        SET pac_password = ? 
+        WHERE pac_dni = ?
+      `, [hashedPassword, finalDni]);
+    }
 
     await connection.commit();
     return res.status(201).json({ message: 'Registro exitoso.' });
