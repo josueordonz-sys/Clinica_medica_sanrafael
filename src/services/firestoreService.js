@@ -7,7 +7,7 @@ import { firebaseConfig } from '../config/firebase.js';
 let app = null;
 let db = null;
 let isFirebaseActive = false;
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = '/api';
 
 // Memoria caché local
 let cache = {

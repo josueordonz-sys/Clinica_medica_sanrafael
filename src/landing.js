@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!gridEspecialidades && !selEspecialidad) return;
 
     try {
-      const res = await fetch('http://localhost:3000/api/especialidades/public');
+      const res = await fetch('/api/especialidades/public');
       if (!res.ok) throw new Error('Error al cargar especialidades');
       const data = await res.json();
       
@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selMedico.disabled = true;
 
       try {
-        const res = await fetch(`http://localhost:3000/api/medicos/public?esp_id=${espId}`);
+        const res = await fetch(`/api/medicos/public?esp_id=${espId}`);
         if (!res.ok) throw new Error('Error al cargar médicos');
         const data = await res.json();
         
@@ -275,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (btnSubmit) { btnSubmit.disabled = true; btnSubmit.textContent = 'Enviando...'; }
 
       try {
-        const res = await fetch('http://localhost:3000/api/pacientes/recuperar-password', {
+        const res = await fetch('/api/pacientes/recuperar-password', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ dniOrEmail })
@@ -320,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (btnSubmit) { btnSubmit.disabled = true; btnSubmit.textContent = 'Actualizando...'; }
 
       try {
-        const res = await fetch('http://localhost:3000/api/pacientes/reset-password', {
+        const res = await fetch('/api/pacientes/reset-password', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ dniOrEmail: window.pendingPacienteLogin.dni, newPassword })
@@ -396,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const password = document.getElementById('login-password').value;
 
       try {
-        const res = await fetch('http://localhost:3000/api/pacientes/login', {
+        const res = await fetch('/api/pacientes/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ dni, password })
@@ -492,7 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       try {
-        const res = await fetch('http://localhost:3000/api/pacientes/registro', {
+        const res = await fetch('/api/pacientes/registro', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -535,7 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       try {
-        const res = await fetch('http://localhost:3000/api/citas/public', {
+        const res = await fetch('/api/citas/public', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentUser.token || ''}` },
           body: JSON.stringify(payload)
@@ -563,7 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!gridEspecialistasIndex) return; // Solo ejecutar si estamos en index.html o donde exista el grid
 
     try {
-      const res = await fetch('http://localhost:3000/api/empleados');
+      const res = await fetch('/api/empleados');
       const data = await res.json();
       if (!res.ok) throw new Error('Error al cargar especialistas');
 

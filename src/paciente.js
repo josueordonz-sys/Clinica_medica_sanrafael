@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
     tbody.innerHTML = '<tr><td colspan="6" class="has-text-centered">Cargando citas...</td></tr>';
     
     try {
-      const res = await fetch(`http://localhost:3000/api/pacientes/${currentUser.dni}/citas`);
+      const res = await fetch(`/api/pacientes/${currentUser.dni}/citas`);
       const data = await res.json();
       
       if (!res.ok) throw new Error(data.message);
@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (!confirm('¿Seguro que deseas cancelar esta cita?')) return;
           const id = e.target.getAttribute('data-id');
           try {
-            await fetch(`http://localhost:3000/api/citas/${id}/cancelar`, { method: 'PUT' });
+            await fetch(`/api/citas/${id}/cancelar`, { method: 'PUT' });
             loadCitas();
           } catch (err) {
             alert('Error al cancelar');
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Cargar Historial y Expedientes (Usan el mismo endpoint pero diferente renderizado)
   const loadDataMedica = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/api/pacientes/${currentUser.dni}/expedientes`);
+      const res = await fetch(`/api/pacientes/${currentUser.dni}/expedientes`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       return data;
@@ -446,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const loadPerfil = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/api/pacientes/${currentUser.dni}`);
+      const res = await fetch(`/api/pacientes/${currentUser.dni}`);
       const data = await res.json();
       
       if (res.ok) {
@@ -470,7 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     try {
-      const res = await fetch(`http://localhost:3000/api/pacientes/${currentUser.dni}/perfil`, {
+      const res = await fetch(`/api/pacientes/${currentUser.dni}/perfil`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
