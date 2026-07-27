@@ -143,22 +143,23 @@ async function getPatientColumns(connection = pool) {
   return new Set(rows.map((row) => row.Field));
 }
 
-async function ensurePatientSchema() {
-  try {
-    const columns = await getPatientColumns();
+async function ensurePatientSchema(connection = pool) {
+  let columns = await getPatientColumns(connection);
 
-    if (!columns.has('pac_password')) {
-      await pool.execute('ALTER TABLE PACIENTES ADD COLUMN pac_password VARCHAR(255) DEFAULT NULL AFTER pac_email');
-      console.log('Columna PACIENTES.pac_password creada correctamente.');
-    }
-
-    if (!columns.has('pac_activo')) {
-      await pool.execute('ALTER TABLE PACIENTES ADD COLUMN pac_activo TINYINT(1) NOT NULL DEFAULT 1 AFTER pac_fecha_registro');
-      console.log('Columna PACIENTES.pac_activo creada correctamente.');
-    }
-  } catch (error) {
-    console.error('Error verificando esquema de PACIENTES:', error.message);
+  // No usamos AFTER: las bases antiguas pueden no tener la columna de referencia.
+  if (!columns.has('pac_password')) {
+    await connection.execute('ALTER TABLE PACIENTES ADD COLUMN pac_password VARCHAR(255) DEFAULT NULL');
+    console.log('Columna PACIENTES.pac_password creada correctamente.');
+    columns = await getPatientColumns(connection);
   }
+
+  if (!columns.has('pac_activo')) {
+    await connection.execute('ALTER TABLE PACIENTES ADD COLUMN pac_activo TINYINT(1) NOT NULL DEFAULT 1');
+    console.log('Columna PACIENTES.pac_activo creada correctamente.');
+    columns = await getPatientColumns(connection);
+  }
+
+  return columns;
 }
 
 function splitFullName(fullName = '') {
@@ -1986,6 +1987,7 @@ app.post('/api/pacientes/registro', async (req, res) => {
   let connection;
   try {
     connection = await pool.getConnection();
+    const patientColumns = await ensurePatientSchema(connection);
     await connection.beginTransaction();
 
     const [pacResult] = await connection.execute(
@@ -1995,7 +1997,6 @@ app.post('/api/pacientes/registro', async (req, res) => {
     let finalDni = dni;
     if (pacResult.length === 0) {
       const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
-      const patientColumns = await getPatientColumns(connection);
       const patientData = {
         pac_dni: dni,
         pac_pnom: primerNombre.trim(),
@@ -2070,14 +2071,17 @@ app.post('/api/pacientes/login', async (req, res) => {
     return res.status(403).json({ message: 'Petición bloqueada por seguridad. Se detectaron caracteres no permitidos.' });
   }
   try {
+    await ensurePatientSchema();
+
     // 1. Primero intentar buscar en EMPLEADOS (Administradores, Médicos, etc.)
     const [empRows] = await pool.execute(`
       SELECT e.emp_id AS id, CONCAT(e.emp_pnom, ' ', e.emp_pape) AS name, 
              e.emp_email AS email, r.rol_nombre AS role, e.emp_password AS storedPassword
       FROM EMPLEADOS e
       JOIN ROLES r ON e.rol_id = r.rol_id
-      WHERE REPLACE(e.emp_dni, '-', '') = REPLACE(?, '-', '') AND e.emp_activo = 1
-    `, [dniStr]);
+      WHERE (REPLACE(e.emp_dni, '-', '') = REPLACE(?, '-', '') OR LOWER(e.emp_email) = LOWER(?))
+        AND e.emp_activo = 1
+    `, [dniStr, dniStr]);
 
     if (empRows.length > 0) {
       const emp = empRows[0];
@@ -2109,8 +2113,8 @@ app.post('/api/pacientes/login', async (req, res) => {
     const [pacRows] = await pool.execute(`
       SELECT pac_dni AS dni, CONCAT(pac_pnom, ' ', pac_pape) AS nombre, pac_email AS email, pac_password
       FROM PACIENTES
-      WHERE REPLACE(pac_dni, '-', '') = REPLACE(?, '-', '')
-    `, [dniStr]);
+      WHERE REPLACE(pac_dni, '-', '') = REPLACE(?, '-', '') OR LOWER(pac_email) = LOWER(?)
+    `, [dniStr, dniStr]);
 
     if (pacRows.length === 0) {
       return res.status(401).json({ message: 'Credenciales inválidas.' });
@@ -2119,7 +2123,7 @@ app.post('/api/pacientes/login', async (req, res) => {
     const pac = pacRows[0];
     
     // Validar contraseña con bcrypt o texto plano (compatibilidad)
-    const expectedDefaultPass = dniStr.replace(/-/g, '');
+    const expectedDefaultPass = String(pac.dni).replace(/-/g, '');
     let isPassValid = false;
 
     if (pac.pac_password && pac.pac_password.startsWith('$2')) {
@@ -2384,5 +2388,9 @@ app.use((error, req, res, next) => {
 app.listen(port, async () => {
   console.log(`Servidor local escuchando en http://localhost:${port}`);
   await testDatabaseConnection();
-  await ensurePatientSchema();
+  try {
+    await ensurePatientSchema();
+  } catch (error) {
+    console.error('Error verificando esquema de PACIENTES:', error.message);
+  }
 });
