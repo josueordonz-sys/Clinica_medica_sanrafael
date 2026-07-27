@@ -4,6 +4,12 @@
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
+  const API_ORIGIN = ['127.0.0.1:5502', '127.0.0.1:5503', 'localhost:5502', 'localhost:5503'].includes(window.location.host)
+    ? 'http://127.0.0.1:3000'
+    : '';
+
+  const apiUrl = (path) => `${API_ORIGIN}${path}`;
+
   // Manejo del Navbar Burger (Mobile)
   const navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
   if (navbarBurgers.length > 0) {
@@ -113,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!gridEspecialidades && !selEspecialidad) return;
 
     try {
-      const res = await fetch('/api/especialidades/public');
+      const res = await fetch(apiUrl('/api/especialidades/public'));
       if (!res.ok) throw new Error('Error al cargar especialidades');
       const data = await res.json();
       
@@ -194,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selMedico.disabled = true;
 
       try {
-        const res = await fetch(`/api/medicos/public?esp_id=${espId}`);
+        const res = await fetch(apiUrl(`/api/medicos/public?esp_id=${espId}`));
         if (!res.ok) throw new Error('Error al cargar médicos');
         const data = await res.json();
         
@@ -275,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (btnSubmit) { btnSubmit.disabled = true; btnSubmit.textContent = 'Enviando...'; }
 
       try {
-        const res = await fetch('/api/pacientes/recuperar-password', {
+        const res = await fetch(apiUrl('/api/pacientes/recuperar-password'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ dniOrEmail })
@@ -320,7 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (btnSubmit) { btnSubmit.disabled = true; btnSubmit.textContent = 'Actualizando...'; }
 
       try {
-        const res = await fetch('/api/pacientes/reset-password', {
+        const res = await fetch(apiUrl('/api/pacientes/reset-password'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ dniOrEmail: window.pendingPacienteLogin.dni, newPassword })
@@ -396,7 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const password = document.getElementById('login-password').value;
 
       try {
-        const res = await fetch('/api/pacientes/login', {
+        const res = await fetch(apiUrl('/api/pacientes/login'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ dni, password })
@@ -492,7 +498,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       try {
-        const res = await fetch('/api/pacientes/registro', {
+        const res = await fetch(apiUrl('/api/pacientes/registro'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -535,7 +541,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       try {
-        const res = await fetch('/api/citas/public', {
+        const res = await fetch(apiUrl('/api/citas/public'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentUser.token || ''}` },
           body: JSON.stringify(payload)
@@ -563,7 +569,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!gridEspecialistasIndex) return; // Solo ejecutar si estamos en index.html o donde exista el grid
 
     try {
-      const res = await fetch('/api/empleados');
+      const res = await fetch(apiUrl('/api/empleados'));
       const data = await res.json();
       if (!res.ok) throw new Error('Error al cargar especialistas');
 
