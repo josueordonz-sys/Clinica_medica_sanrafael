@@ -10,6 +10,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const apiUrl = (path) => `${API_ORIGIN}${path}`;
 
+  const parseApiResponse = async (res, fallbackMessage = 'Error en la solicitud') => {
+    const contentType = res.headers.get('content-type') || '';
+    const data = contentType.includes('application/json')
+      ? await res.json()
+      : { message: fallbackMessage };
+
+    if (!res.ok) {
+      throw new Error(data.message || fallbackMessage);
+    }
+
+    return data;
+  };
+
   // Manejo del Navbar Burger (Mobile)
   const navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
   if (navbarBurgers.length > 0) {
@@ -504,8 +517,7 @@ document.addEventListener('DOMContentLoaded', () => {
           body: JSON.stringify(payload)
         });
         
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || 'Error en el registro');
+        await parseApiResponse(res, 'Error en el registro');
         
         alert('Registro exitoso. Ahora puedes iniciar sesión.');
         showLogin();

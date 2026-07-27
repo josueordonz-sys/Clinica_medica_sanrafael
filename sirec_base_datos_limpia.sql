@@ -36,10 +36,12 @@ CREATE TABLE PACIENTES (
   pac_tel VARCHAR(20),
   pac_dir VARCHAR(255),
   pac_email VARCHAR(100),
+  pac_password VARCHAR(255),
   pac_tipo_sangre VARCHAR(10) DEFAULT 'No sabe',
   pac_contacto_emergencia VARCHAR(150),
   pac_alergias TEXT,
   pac_fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  pac_activo TINYINT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (pac_dni),
   UNIQUE KEY uq_pac_email (pac_email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

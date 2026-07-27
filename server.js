@@ -92,6 +92,27 @@ async function testDatabaseConnection() {
   }
 }
 
+async function patientColumnExists(columnName) {
+  const [rows] = await pool.execute('SHOW COLUMNS FROM PACIENTES LIKE ?', [columnName]);
+  return rows.length > 0;
+}
+
+async function ensurePatientSchema() {
+  try {
+    if (!(await patientColumnExists('pac_password'))) {
+      await pool.execute('ALTER TABLE PACIENTES ADD COLUMN pac_password VARCHAR(255) DEFAULT NULL AFTER pac_email');
+      console.log('Columna PACIENTES.pac_password creada correctamente.');
+    }
+
+    if (!(await patientColumnExists('pac_activo'))) {
+      await pool.execute('ALTER TABLE PACIENTES ADD COLUMN pac_activo TINYINT(1) NOT NULL DEFAULT 1 AFTER pac_fecha_registro');
+      console.log('Columna PACIENTES.pac_activo creada correctamente.');
+    }
+  } catch (error) {
+    console.error('Error verificando esquema de PACIENTES:', error.message);
+  }
+}
+
 function splitFullName(fullName = '') {
   const parts = String(fullName).trim().split(/\s+/).filter(Boolean);
   return {
@@ -1914,8 +1935,9 @@ app.post('/api/pacientes/registro', async (req, res) => {
     return res.status(400).json({ message: 'Todos los campos marcados como requeridos (*) son obligatorios.' });
   }
 
-  const connection = await pool.getConnection();
+  let connection;
   try {
+    connection = await pool.getConnection();
     await connection.beginTransaction();
 
     const [pacResult] = await connection.execute(
@@ -1957,14 +1979,18 @@ app.post('/api/pacientes/registro', async (req, res) => {
     await connection.commit();
     return res.status(201).json({ message: 'Registro exitoso.' });
   } catch (error) {
-    await connection.rollback();
+    if (connection) {
+      await connection.rollback().catch((rollbackError) => {
+        console.error('Error revirtiendo registro de paciente:', rollbackError);
+      });
+    }
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(409).json({ message: 'El DNI o el correo ya están registrados.' });
     }
-    console.error(error);
-    return res.status(500).json({ message: 'Error interno.' });
+    console.error('Error en registro de paciente:', error);
+    return res.status(500).json({ message: 'Error interno registrando paciente.' });
   } finally {
-    connection.release();
+    if (connection) connection.release();
   }
 });
 
@@ -2280,7 +2306,16 @@ app.put('/api/pacientes/:dni/perfil', async (req, res) => {
   }
 });
 
+app.use((error, req, res, next) => {
+  console.error('Error no controlado:', error);
+  if (req.path.startsWith('/api/')) {
+    return res.status(500).json({ message: 'Error interno.' });
+  }
+  return next(error);
+});
+
 app.listen(port, async () => {
   console.log(`Servidor local escuchando en http://localhost:${port}`);
   await testDatabaseConnection();
+  await ensurePatientSchema();
 });
