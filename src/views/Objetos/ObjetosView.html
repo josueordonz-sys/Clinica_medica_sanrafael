@@ -1,0 +1,75 @@
+<div class="glass-card" style="margin-bottom: 24px; padding: 20px 24px; border-top: 4px solid var(--info, #0ea5e9);">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <h2 style="font-size: 1.4rem; font-weight: 700; margin: 0;">Gestión de Objetos del Sistema</h2>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin: 4px 0 0;">
+        Pantallas y módulos controlados por la seguridad.
+      </p>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+      <input type="text" id="search-objetos" class="form-input" placeholder="Buscar por nombre o descripción..." style="min-width: 250px;">
+      <button id="btn-add-objeto" class="btn btn-primary" style="display:flex; gap:8px; align-items:center; background-color: #5bc0de; border-color: #46b8da;">
+        + Nuevo Objeto
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="glass-card" style="padding: 0; overflow: hidden;">
+  <div class="table-container" style="overflow-x: auto;">
+    <table class="table is-fullwidth is-hoverable is-striped" style="margin-bottom: 0;">
+      <thead style="background: var(--dark, #1f2937); color: #fff;">
+        <tr>
+          <th style="color: #fff;">Nombre</th>
+          <th style="color: #fff;">Descripción</th>
+          <th style="color: #fff;" class="has-text-centered">Roles asignados</th>
+          <th style="color: #fff;" class="has-text-centered">Estado</th>
+          <th style="color: #fff;" class="has-text-centered">Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="objetos-table-body">
+        <!-- Objetos render here -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal: Crear/Editar Objeto -->
+<div id="modal-objeto-form" class="modal-overlay" style="display:none;">
+  <div class="glass-card" style="width: 440px; max-width: 92%; background: var(--bg-secondary);">
+    <div class="card-header-flex" style="margin-bottom: 20px;">
+      <h3 class="card-title">
+        <span id="modal-objeto-title">Crear Nuevo Objeto</span>
+      </h3>
+      <button type="button" class="btn-close-modal" style="background:none;border:none;font-size:1.6rem;cursor:pointer;color:var(--text-muted);">&times;</button>
+    </div>
+    <form id="form-create-objeto">
+      <input type="hidden" id="edit-objeto-id" value="">
+      
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label class="form-label" for="obj-nombre">Nombre del Objeto <span class="required">*</span></label>
+        <input type="text" id="obj-nombre" class="form-input" placeholder="Ej. CAI, CASILLERO EXPRESS" required>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label class="form-label" for="obj-desc">Descripción</label>
+        <textarea id="obj-desc" class="form-input" rows="2" placeholder="Descripción de este objeto o módulo..."></textarea>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label class="form-label">Roles Permitidos (Accesos)</label>
+        <div id="obj-roles-container" style="background: var(--bg-primary, #ffffff); border: 1px solid var(--border-color, #e5e7eb); border-radius: 8px; padding: 12px; max-height: 180px; overflow-y: auto;">
+          <!-- Checkboxes se cargarán aquí dinámicamente -->
+          <div style="color: var(--text-muted); font-size: 0.85rem; text-align: center;">Cargando roles...</div>
+        </div>
+      </div>
+
+      <div id="objeto-form-error" style="display:none; padding: 10px 14px; margin-bottom:16px; border-radius:8px; background: var(--danger-light, #fee2e2); color: var(--danger, #dc2626); font-size:0.85rem;"></div>
+      
+      <div style="display:flex; justify-content:flex-end; gap:12px;">
+        <button type="button" class="btn btn-secondary btn-close-modal">Cancelar</button>
+        <button type="submit" id="btn-submit-objeto" class="btn btn-primary" style="background-color: #5bc0de;">Guardar Objeto</button>
+      </div>
+    </form>
+  </div>
+</div>

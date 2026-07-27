@@ -1,0 +1,131 @@
+<div class="glass-card">
+  <div class="card-header-flex">
+    <h2 class="card-title">
+      <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-width="2">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+      Registro Único de Pacientes
+    </h2>
+    <span style="font-size: 0.85rem; color: var(--text-muted);">Módulo: Recepción</span>
+  </div>
+
+  <div id="lista-pacientes" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-top: 16px;">
+    <!-- Dinámico -->
+  </div>
+
+  <button id="btn-open-modal-paciente" class="btn btn-primary" data-perm-action="insertar" style="position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); padding: 0; z-index: 10;">
+    <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" fill="none" stroke-width="2">
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  </button>
+</div>
+
+<!-- Modal Formulario -->
+<div class="modal-overlay" id="modal-paciente" style="display: none;">
+  <div class="modal-content" style="max-width: 800px; padding: 0;">
+    <div class="glass-card" style="margin: 0; max-height: 90vh; overflow-y: auto;">
+      <div class="card-header-flex">
+        <h2 class="card-title">Nuevo Paciente</h2>
+        <button id="btn-close-modal-paciente" style="background: none; border: none; cursor: pointer; color: var(--text-muted);">
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="form-registro-paciente" autocomplete="on" style="margin-top: 16px;">
+        <h3 style="margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">Datos
+          Personales</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="paciente-dni">Identidad (DNI) <span class="required">*</span></label>
+            <input type="text" id="paciente-dni" class="form-input" placeholder="Ej. 0801-1995-12345" required
+              autocomplete="username">
+            <span class="input-feedback">El DNI debe tener 13 dígitos numéricos.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="paciente-nombres">Nombres <span class="required">*</span></label>
+            <input type="text" id="paciente-nombres" class="form-input" placeholder="Nombres" required
+              autocomplete="given-name">
+            <span class="input-feedback">No se permiten números en este campo.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="paciente-apellidos">Apellidos <span class="required">*</span></label>
+            <input type="text" id="paciente-apellidos" class="form-input" placeholder="Apellidos" required
+              autocomplete="family-name">
+            <span class="input-feedback">No se permiten números en este campo.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="paciente-fecha-nacimiento">Fecha de Nacimiento <span
+                class="required">*</span></label>
+            <input type="date" id="paciente-fecha-nacimiento" class="form-input" required autocomplete="bday">
+            <span class="input-feedback">La fecha de nacimiento no puede ser hoy ni estar en el futuro.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="paciente-genero">Género <span class="required">*</span></label>
+            <select id="paciente-genero" class="form-input" required autocomplete="sex">
+              <option value="" disabled selected>Seleccione género</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Femenino">Femenino</option>
+              <option value="Otro">Otro / No especifica</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="paciente-telefono">Teléfono Celular <span class="required">*</span></label>
+            <input type="tel" id="paciente-telefono" class="form-input" placeholder="Ej. 9988-7766" required
+              autocomplete="tel">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="paciente-correo">Correo Electrónico</label>
+            <input type="email" id="paciente-correo" class="form-input" placeholder="correo@ejemplo.com"
+              autocomplete="email">
+          </div>
+          <div class="form-group col-span-2">
+            <label class="form-label" for="paciente-direccion">Dirección Exacta</label>
+            <textarea id="paciente-direccion" class="form-textarea" rows="2" placeholder="Dirección..."
+              autocomplete="street-address"></textarea>
+          </div>
+        </div>
+
+        <h3 style="margin: 24px 0 16px 0; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">Datos
+          Médicos / Contacto</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="paciente-tipo-sangre">Tipo de Sangre</label>
+            <select id="paciente-tipo-sangre" class="form-input">
+              <option value="" selected>No sabe</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="paciente-contacto-emergencia">Contacto de Emergencia</label>
+            <input type="text" id="paciente-contacto-emergencia" class="form-input" placeholder="Nombre y celular">
+          </div>
+          <div class="form-group col-span-2">
+            <label class="form-label" for="paciente-alergias">Alergias Conocidas</label>
+            <input type="text" id="paciente-alergias" class="form-input" placeholder="Medicamentos, alimentos, etc.">
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+          <button type="reset" class="btn btn-secondary">Limpiar Formulario</button>
+          <button type="button" class="btn btn-secondary" id="btn-cancel-modal-paciente">Cancelar</button>
+          <button type="submit" class="btn btn-primary" data-perm-action="insertar">Guardar Paciente</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</body>

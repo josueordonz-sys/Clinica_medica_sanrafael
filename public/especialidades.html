@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="../src/assets/logo.png">
+  <title>Especialidades - Clínica Médica San Rafael</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
+  <link rel="stylesheet" href="../src/assets/estilos.css">
+</head>
+<body class="landing-page">
+
+  <nav class="navbar landing-navbar" role="navigation" aria-label="main navigation">
+    <div class="container">
+      <div class="navbar-brand" style="align-items: center;">
+        <img src="../src/assets/logo.png" alt="logo" style="width: 40px; height: 40px;">
+        <span class="logo-text">Clínica San Rafael</span>
+        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div id="navbarBasicExample" class="navbar-menu">
+        <div class="navbar-end" style="align-items: center;">
+          <a class="navbar-item" href="index.html">Inicio</a>
+          <a class="navbar-item" href="nosotros.html">Sobre Nosotros</a>
+          <a class="navbar-item" href="especialidades.html">Especialidades</a>
+          <div class="navbar-item">
+            <a class="btn-medical" style="text-decoration: none; display: inline-block;" href="agendar.html">Agendar Cita</a>
+          </div>
+          <div class="navbar-item">
+            <button class="button is-light" id="btn-login-modal">Iniciar Sesión</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <section id="especialidades" class="section" style="background-color: var(--light-bg); min-height: calc(100vh - 250px);">
+    <div class="container">
+      <h2 class="title is-2 section-title">Especialidades Disponibles</h2>
+      <div class="columns is-multiline" id="specialties-grid">
+        <div class="column is-12 has-text-centered">
+          <p>Cargando especialidades...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer style="margin-top: auto;">
+    <div class="container">
+      <p>&copy; 2026 Clínica Médica San Rafael. Todos los derechos reservados.</p>
+      <p>San Pedro Sula, Honduras.</p>
+    </div>
+  </footer>
+
+  <div class="modal" id="modal-auth">
+    <div class="modal-background" id="modal-auth-bg"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title" id="modal-auth-title">Iniciar Sesión Paciente</p>
+        <button class="delete" aria-label="close" id="modal-auth-close"></button>
+      </header>
+      <section class="modal-card-body">
+        
+        <form id="form-login-paciente">
+          <div class="field">
+            <label class="label">Número de Identidad</label>
+            <div class="control">
+              <input class="input" type="text" id="login-dni" placeholder="Sin guiones" required>
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Contraseña</label>
+            <div class="control">
+              <input class="input" type="password" id="login-password" required>
+            </div>
+          </div>
+          <div class="field has-text-right">
+            <a href="#" id="link-recover-password">¿Olvidaste tu contraseña?</a>
+          </div>
+          <div class="control mt-4">
+            <button type="submit" class="button is-primary is-fullwidth">Ingresar</button>
+          </div>
+          <div class="has-text-centered mt-4">
+            ¿No tienes cuenta? <a href="#" id="link-show-register">Regístrate aquí</a>
+          </div>
+          <div class="has-text-centered mt-4" style="border-top: 1px solid #eee; padding-top:15px;">
+            <a href="admin.html" style="color: #888; font-size: 0.85rem;">Acceso para Personal Médico</a>
+          </div>
+        </form>
+
+        <form id="form-registro-paciente" style="display: none;">
+          <div class="columns is-multiline">
+            <div class="column is-6">
+              <div class="field">
+                <label class="label">DNI (Sin guiones)</label>
+                <div class="control">
+                  <input class="input" type="text" id="reg-dni" required>
+                </div>
+              </div>
+            </div>
+            <div class="column is-6">
+              <div class="field">
+                <label class="label">Correo Electrónico</label>
+                <div class="control">
+                  <input class="input" type="email" id="reg-correo" required>
+                </div>
+              </div>
+            </div>
+            <div class="column is-6">
+              <div class="field">
+                <label class="label">Nombres</label>
+                <div class="control">
+                  <input class="input" type="text" id="reg-nombres" required>
+                </div>
+              </div>
+            </div>
+            <div class="column is-6">
+              <div class="field">
+                <label class="label">Apellidos</label>
+                <div class="control">
+                  <input class="input" type="text" id="reg-apellidos" required>
+                </div>
+              </div>
+            </div>
+            <div class="column is-6">
+              <div class="field">
+                <label class="label">Fecha de Nacimiento</label>
+                <div class="control">
+                  <input class="input" type="date" id="reg-fecnac" required>
+                </div>
+              </div>
+            </div>
+            <div class="column is-6">
+              <div class="field">
+                <label class="label">Género</label>
+                <div class="control">
+                  <div class="select is-fullwidth">
+                    <select id="reg-genero" required>
+                      <option value="M">Masculino</option>
+                      <option value="F">Femenino</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="column is-6">
+              <div class="field">
+                <label class="label">Teléfono</label>
+                <div class="control">
+                  <input class="input" type="tel" id="reg-telefono">
+                </div>
+              </div>
+            </div>
+            <div class="column is-6">
+              <div class="field">
+                <label class="label">Contraseña</label>
+                <div class="control">
+                  <input class="input" type="password" id="reg-password" required>
+                </div>
+              </div>
+            </div>
+            <div class="column is-12 mt-4">
+              <button type="submit" class="button is-primary is-fullwidth">Crear Cuenta</button>
+            </div>
+            <div class="column is-12 has-text-centered mt-3">
+              <a href="#" id="link-show-login">Volver a Iniciar Sesión</a>
+            </div>
+          </div>
+        </form>
+
+      </section>
+    </div>
+  </div>
+
+  <script src="../src/landing.js" type="module"></script>
+</body>
+</html>

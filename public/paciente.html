@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="../src/assets/logo.png">
+  <title>Portal del Paciente - SIREC</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
+  <link rel="stylesheet" href="../src/assets/estilos.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+  <style>
+    .patient-sidebar {
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border-glass);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- OVERLAY para cerrar sidebar en móvil -->
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+  <aside class="app-sidebar patient-sidebar" id="patient-sidebar">
+    <!-- Botón cerrar dentro del sidebar en móvil -->
+    <button id="btn-close-sidebar" class="sidebar-close-btn" aria-label="Cerrar menú">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+
+    <div class="sidebar-logo">
+      <img src="../src/assets/logo.png" alt="logo" style="width: 32px; height: 32px;">
+      <div class="logo-text">
+        <span class="logo-title">Mi Salud</span>
+        <span class="logo-subtitle">Portal del Paciente</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-link active" data-target="view-mis-citas">
+        <span class="material-symbols-outlined">calendar_month</span>
+        Mis Citas
+      </div>
+      <div class="nav-link" data-target="view-historial">
+        <span class="material-symbols-outlined">history</span>
+        Historial Médico
+      </div>
+      <div class="nav-link" data-target="view-expedientes">
+        <span class="material-symbols-outlined">picture_as_pdf</span>
+        Expedientes
+      </div>
+      <div class="nav-link" data-target="view-perfil">
+        <span class="material-symbols-outlined">person</span>
+        Mi Perfil
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="role-widget">
+        <label>Paciente:</label>
+        <div id="patient-name-display" style="font-weight: 600; margin-bottom: 10px;">Cargando...</div>
+        <button id="btn-logout-paciente" class="btn btn-secondary btn-small" style="width:100%;">Cerrar Sesión</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="app-body">
+    <header class="app-header">
+      <!-- Botón hamburguesa (solo visible en móvil) -->
+      <button id="btn-hamburger" class="hamburger-btn" aria-label="Abrir menú">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+
+      <div class="header-search" style="display:flex; align-items:center;">
+        <h2 class="title is-4 m-0">Portal del Paciente</h2>
+      </div>
+      <div class="header-actions">
+        <a href="index.html" class="button is-text is-hidden-mobile">Ir al Sitio Web</a>
+        <div class="user-profile">
+          <div class="user-avatar" id="avatar-letters">PA</div>
+        </div>
+      </div>
+    </header>
+
+    <div id="alert-container"></div>
+
+    <!-- PANTALLA: MIS CITAS -->
+    <section id="view-mis-citas" class="app-view p-4">
+      <div class="header-with-actions mb-4">
+        <h2 class="title is-3">Mis Citas</h2>
+        <a href="agendar.html" class="button is-primary is-small-mobile">Agendar Nueva Cita</a>
+      </div>
+      <div class="box p-0" style="overflow:hidden;">
+        <div class="table-container" style="border:none;">
+          <table class="table is-fullwidth is-striped is-hoverable" id="tabla-mis-citas">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th class="is-hidden-mobile">Especialidad</th>
+                <th class="is-hidden-mobile">Médico</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Dinámico -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANTALLA: HISTORIAL MÉDICO -->
+    <section id="view-historial" class="app-view p-4" style="display: none;">
+      <h2 class="title is-3 mb-4">Mi Historial Médico</h2>
+      <div class="columns is-multiline" id="historial-container">
+        <!-- Dinámico -->
+        <div class="column is-12"><p>Cargando historial...</p></div>
+      </div>
+    </section>
+
+    <!-- PANTALLA: EXPEDIENTES -->
+    <section id="view-expedientes" class="app-view p-4" style="display: none;">
+      <h2 class="title is-3 mb-4">Expedientes y Documentos</h2>
+      <div class="columns is-multiline" id="expedientes-container">
+        <!-- Dinámico -->
+        <div class="column is-12"><p>Cargando expedientes...</p></div>
+      </div>
+    </section>
+
+    <!-- PANTALLA: PERFIL -->
+    <section id="view-perfil" class="app-view p-4" style="display: none;">
+      <h2 class="title is-3 mb-4">Mi Perfil</h2>
+      <div class="box" style="max-width: 600px;">
+        <form id="form-perfil-paciente">
+          <div class="field">
+            <label class="label">Nombres</label>
+            <div class="control">
+              <input class="input" type="text" id="perfil-nombres" required>
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Apellidos</label>
+            <div class="control">
+              <input class="input" type="text" id="perfil-apellidos" required>
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Correo Electrónico</label>
+            <div class="control">
+              <input class="input" type="email" id="perfil-correo" required>
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Teléfono</label>
+            <div class="control">
+              <input class="input" type="tel" id="perfil-telefono">
+            </div>
+          </div>
+
+          <div class="control mt-4">
+            <button type="submit" class="button is-primary">Guardar Cambios</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- NAVEGACIÓN INFERIOR MÓVIL -->
+  <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+    <button class="mobile-nav-item active" data-target="view-mis-citas">
+      <span class="material-symbols-outlined">calendar_month</span>
+      <span>Citas</span>
+    </button>
+    <button class="mobile-nav-item" data-target="view-historial">
+      <span class="material-symbols-outlined">history</span>
+      <span>Historial</span>
+    </button>
+    <button class="mobile-nav-item" data-target="view-expedientes">
+      <span class="material-symbols-outlined">picture_as_pdf</span>
+      <span>Expedientes</span>
+    </button>
+    <button class="mobile-nav-item" data-target="view-perfil">
+      <span class="material-symbols-outlined">person</span>
+      <span>Perfil</span>
+    </button>
+  </nav>
+
+  <!-- MODAL IMPRESIÓN (PDF) -->
+  <div class="modal" id="modal-ticket">
+    <div class="modal-background" id="modal-ticket-bg"></div>
+    <div class="modal-card" style="width: 800px; max-width: 95%;">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Documento / Expediente</p>
+        <button class="delete" aria-label="close" id="modal-ticket-close"></button>
+      </header>
+      <section class="modal-card-body" style="background-color: #f1f5f9; display: flex; justify-content: center; padding: 40px 20px;">
+        <!-- Aquí se inyecta el HTML del documento generado -->
+        <div id="ticket-print-content" class="ticket-print"></div>
+      </section>
+      <footer class="modal-card-foot" style="justify-content: flex-end;">
+        <button class="button" id="btn-cerrar-ticket">Cerrar</button>
+        <button class="button is-primary" id="btn-imprimir-real">Imprimir / Guardar PDF</button>
+      </footer>
+    </div>
+  </div>
+
+  <script src="../src/paciente.js" type="module"></script>
+</body>
+</html>
+

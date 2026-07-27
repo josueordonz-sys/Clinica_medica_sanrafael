@@ -1,0 +1,101 @@
+<div class="glass-card">
+        <div class="card-header-flex">
+          <h2 class="card-title">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-width="2">
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+              <line x1="1" y1="10" x2="23" y2="10" />
+            </svg>
+            Facturación y Cobros
+          </h2>
+          <span style="font-size: 0.85rem; color: var(--text-muted);">Módulo: Finanzas / Cobros</span>
+        </div>
+
+        <div class="patient-finder">
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+            <label class="form-label" for="caja-buscar-dni">DNI del Paciente <span class="required">*</span></label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="caja-buscar-dni" class="form-input"
+                placeholder="Buscar paciente con pago pendiente..." list="dni-list">
+              <button class="btn btn-primary" id="btn-buscar-caja-paciente">Buscar</button>
+            </div>
+          </div>
+        </div>
+
+        <form id="form-procesar-pago">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="caja-nombre-paciente">Paciente</label>
+              <input type="text" id="caja-nombre-paciente" class="form-input" readonly
+                placeholder="Busque una cita pendiente de pago">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="caja-txn-id">ID Transacción</label>
+              <input type="text" id="caja-txn-id" class="form-input" readonly>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="caja-factura-num">Número de Factura</label>
+              <input type="text" id="caja-factura-num" class="form-input" readonly>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="caja-monto">Monto a Pagar (L.)</label>
+              <input type="number" id="caja-monto" class="form-input" readonly>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="caja-metodo-pago">Método de Pago <span class="required">*</span></label>
+              <select id="caja-metodo-pago" class="form-input" required>
+                <option value="Efectivo" selected>Efectivo</option>
+                <option value="Tarjeta">Tarjeta de Crédito / Débito</option>
+                <option value="Seguro">Seguro Médico</option>
+                <option value="Transferencia">Transferencia</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="caja-receta-container" class="glass-card"
+            style="display:none; margin-top: 18px; padding: 16px; background-color: var(--bg-primary);">
+            <h3 style="font-size: 0.95rem; margin-bottom: 12px; font-weight: 700;">Medicamentos Recetados</h3>
+            <div class="table-container" style="border:none;">
+              <table class="app-table" id="tabla-caja-receta" style="font-size: 0.82rem;">
+                <thead>
+                  <tr>
+                    <th>Comprar</th>
+                    <th>Medicamento</th>
+                    <th>Cant.</th>
+                    <th>Precio</th>
+                    <th>Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+
+            <button type="submit" class="btn btn-success" id="btn-procesar-pago" disabled>Procesar Pago</button>
+          </div>
+        </form>
+
+        <h3
+          style="margin-top: 32px; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
+          Transacciones Recientes</h3>
+        <div class="table-container">
+          <table class="app-table" id="tabla-transacciones">
+            <thead>
+              <tr>
+                <th>ID Transacción</th>
+                <th>DNI</th>
+                <th>Paciente</th>
+                <th>Monto</th>
+                <th>Factura</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Dinámico -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+</body>

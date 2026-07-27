@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="../src/assets/logo.png">
+  <title>Agendar Cita - Clínica Médica San Rafael</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
+  <link rel="stylesheet" href="../src/assets/estilos.css">
+</head>
+<body class="landing-page">
+
+  <nav class="navbar landing-navbar" role="navigation" aria-label="main navigation">
+    <div class="container">
+      <div class="navbar-brand" style="align-items: center;">
+        <img src="../src/assets/logo.png" alt="logo" style="width: 40px; height: 40px;">
+        <span class="logo-text">Clínica San Rafael</span>
+        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div id="navbarBasicExample" class="navbar-menu">
+        <div class="navbar-end" style="align-items: center;">
+          <a class="navbar-item" href="index.html">Inicio</a>
+          <a class="navbar-item" href="nosotros.html">Sobre Nosotros</a>
+          <a class="navbar-item" href="especialidades.html">Especialidades</a>
+          <div class="navbar-item">
+            <a class="btn-medical" style="text-decoration: none; display: inline-block;" href="agendar.html">Agendar Cita</a>
+          </div>
+          <div class="navbar-item">
+            <button class="button is-light" id="btn-login-modal">Iniciar Sesión</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <section id="agendar" class="section">
+    <div class="container">
+      <h2 class="title is-2 section-title">Agenda tu Cita Médica</h2>
+      
+      <div class="wizard-container" id="appointment-wizard">
+        <div class="has-text-centered mb-5" id="auth-status-banner">
+          <p>¿Ya eres paciente? <a href="#" id="link-login-wizard">Inicia sesión</a> para agendar más rápido, o <a href="#" id="link-register-wizard">Regístrate</a> si eres nuevo.</p>
+        </div>
+
+        <form id="form-agendar-public">
+          <div class="columns is-multiline">
+            <div class="column is-6">
+              <div class="field">
+                <label class="label">Especialidad</label>
+                <div class="control">
+                  <div class="select is-fullwidth">
+                    <select id="wizard-especialidad" required>
+                      <option value="" disabled selected>Selecciona especialidad</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="column is-6">
+              <div class="field">
+                <label class="label">Médico</label>
+                <div class="control">
+                  <div class="select is-fullwidth">
+                    <select id="wizard-medico" required disabled>
+                      <option value="" disabled selected>Selecciona primero especialidad</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="column is-6">
+              <div class="field">
+                <label class="label">Fecha</label>
+                <div class="control">
+                  <input class="input" type="date" id="wizard-fecha" required>
+                </div>
+              </div>
+            </div>
+            <div class="column is-6">
+              <div class="field">
+                <label class="label">Horario</label>
+                <div class="control">
+                  <div class="select is-fullwidth">
+                    <select id="wizard-hora" required>
+                      <option value="08:00">08:00 AM</option>
+                      <option value="09:00">09:00 AM</option>
+                      <option value="10:00">10:00 AM</option>
+                      <option value="11:00">11:00 AM</option>
+                      <option value="13:00">01:00 PM</option>
+                      <option value="14:00">02:00 PM</option>
+                      <option value="15:00">03:00 PM</option>
+                      <option value="16:00">04:00 PM</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="column is-12">
+              <div class="field">
+                <label class="label">Motivo de consulta</label>
+                <div class="control">
+                  <textarea class="textarea" id="wizard-motivo" placeholder="Describe brevemente tus síntomas o motivo de consulta" required></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div id="wizard-guest-fields" class="column is-12" style="display: none; border-top: 1px solid #eee; margin-top: 10px; padding-top: 20px;">
+              <h4 class="title is-5">Datos Personales</h4>
+              <p class="mb-3 text-muted">Deberás completar tu registro o iniciar sesión para agendar la cita.</p>
+            </div>
+
+            <div class="column is-12 has-text-centered mt-4">
+              <button type="submit" class="btn-medical is-large" style="width: 100%; max-width: 300px;">Confirmar Cita</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer style="margin-top: auto;">
+    <div class="container">
+      <p>&copy; 2026 Clínica Médica San Rafael. Todos los derechos reservados.</p>
+      <p>San Pedro Sula, Honduras.</p>
+    </div>
+  </footer>
+
+  <div class="modal" id="modal-auth">
+    <div class="modal-background" id="modal-auth-bg"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title" id="modal-auth-title">Iniciar Sesión Paciente</p>
+        <button class="delete" aria-label="close" id="modal-auth-close"></button>
+      </header>
+      <section class="modal-card-body">
+        
+        <form id="form-login-paciente">
+          <div class="field">
+            <label class="label">Número de Identidad</label>
+            <div class="control">
+              <input class="input" type="text" id="login-dni" placeholder="Sin guiones" required>
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Contraseña</label>
+            <div class="control">
+              <input class="input" type="password" id="login-password" required>
+            </div>
+          </div>
+          <div class="field has-text-right">
+            <a href="#" id="link-recover-password">¿Olvidaste tu contraseña?</a>
+          </div>
+          <div class="control mt-4">
+            <button type="submit" class="button is-primary is-fullwidth">Ingresar</button>
+          </div>
+          <div class="has-text-centered mt-4">
+            ¿No tienes cuenta? <a href="#" id="link-show-register">Regístrate aquí</a>
+          </div>
+          <div class="has-text-centered mt-4" style="border-top: 1px solid #eee; padding-top:15px;">
+            <a href="admin.html" style="color: #888; font-size: 0.85rem;">Acceso para Personal Médico</a>
+          </div>
+        </form>
+
+        <form id="form-forgot-password" style="display: none;">
+          <h4 class="title is-5 mb-4 mt-2 has-text-centered">Recuperar Contraseña</h4>
+          <p class="has-text-centered is-size-7 mb-4">Ingresa tu correo o DNI para recibir una clave provisional.</p>
+          <div class="field">
+            <label class="label">Correo o DNI</label>
+            <div class="control">
+              <input class="input" type="text" id="forgot-email" placeholder="ej. correo@ejemplo.com" required>
+            </div>
+          </div>
+          <div class="control mt-4">
+            <button type="submit" id="btn-forgot-submit" class="button is-primary is-fullwidth">Enviar Clave Provisional</button>
+          </div>
+          <div class="has-text-centered mt-4">
+            <a href="#" id="link-back-login">Volver al Login</a>
+          </div>
+        </form>
+
+        <form id="form-force-password" style="display: none;">
+          <h4 class="title is-5 mb-4 mt-2 has-text-centered has-text-danger">Cambio Obligatorio</h4>
+          <p class="has-text-centered is-size-7 mb-4">Estás usando una contraseña provisional. Por favor, crea una nueva.</p>
+          <div class="field">
+            <label class="label">Nueva Contraseña</label>
+            <div class="control">
+              <input class="input" type="password" id="force-password" required>
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Confirmar Contraseña</label>
+            <div class="control">
+              <input class="input" type="password" id="force-password-confirm" required>
+            </div>
+          </div>
+          <div class="control mt-4">
+            <button type="submit" id="btn-force-submit" class="button is-primary is-fullwidth">Actualizar y Entrar</button>
+          </div>
+          <div class="has-text-centered mt-4">
+            <a href="#" id="link-cancel-force">Cancelar</a>
+          </div>
+        </form>
+
+        <form id="form-registro-paciente" style="display: none;">
+          <div class="columns is-multiline">
+            <div class="column is-6">
+              <div class="field">
+                <label class="label">DNI (Sin guiones)</label>
+                <div class="control">
+                  <input class="input" type="text" id="reg-dni" required>
+                </div>
+              </div>
+            </div>
+            <div class="column is-6">
+              <div class="field">
+                <label class="label">Correo Electrónico</label>
+                <div class="control">
+                  <input class="input" type="email" id="reg-correo" required>
+                </div>
+              </div>
+            </div>
+            <div class="column is-6">
+              <div class="field">
+                <label class="label">Nombres</label>
+                <div class="control">
+                  <input class="input" type="text" id="reg-nombres" required>
+                </div>
+              </div>
+            </div>
+            <div class="column is-6">
+              <div class="field">
+                <label class="label">Apellidos</label>
+                <div class="control">
+                  <input class="input" type="text" id="reg-apellidos" required>
+                </div>
+              </div>
+            </div>
+            <div class="column is-6">
+              <div class="field">
+                <label class="label">Fecha de Nacimiento</label>
+                <div class="control">
+                  <input class="input" type="date" id="reg-fecnac" required>
+                </div>
+              </div>
+            </div>
+            <div class="column is-6">
+              <div class="field">
+                <label class="label">Género</label>
+                <div class="control">
+                  <div class="select is-fullwidth">
+                    <select id="reg-genero" required>
+                      <option value="M">Masculino</option>
+                      <option value="F">Femenino</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="column is-6">
+              <div class="field">
+                <label class="label">Teléfono</label>
+                <div class="control">
+                  <input class="input" type="tel" id="reg-telefono">
+                </div>
+              </div>
+            </div>
+            <div class="column is-6">
+              <div class="field">
+                <label class="label">Contraseña</label>
+                <div class="control">
+                  <input class="input" type="password" id="reg-password" required>
+                </div>
+              </div>
+            </div>
+            <div class="column is-12 mt-4">
+              <button type="submit" class="button is-primary is-fullwidth">Crear Cuenta</button>
+            </div>
+            <div class="column is-12 has-text-centered mt-3">
+              <a href="#" id="link-show-login">Volver a Iniciar Sesión</a>
+            </div>
+          </div>
+        </form>
+
+      </section>
+    </div>
+  </div>
+
+  <script src="../src/landing.js" type="module"></script>
+</body>
+</html>

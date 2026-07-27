@@ -1,0 +1,45 @@
+<div class="glass-card" style="margin-bottom: 24px; padding: 20px 24px; border-top: 4px solid var(--warning, #f59e0b);">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <h2 style="font-size: 1.4rem; font-weight: 700; margin: 0; color: var(--text-primary);">Gestión de Permisos</h2>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 4px 0 0;">
+        Configura los permisos de acceso de cada rol a las distintas pantallas del sistema.
+      </p>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+      <input type="text" id="search-permisos" class="form-input" placeholder="Buscar objeto..." style="min-width: 200px;">
+      <select id="filter-rol-permisos" class="form-input" style="min-width: 200px;">
+        <option value="" disabled selected>Seleccione un Rol</option>
+        <!-- Roles loaded dynamically -->
+      </select>
+      <button id="btn-save-permisos" class="btn btn-primary" style="display:flex; gap:8px; align-items:center; background-color: #10b981; border-color: #059669;" disabled>
+        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+        Guardar Cambios
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="glass-card" style="padding: 0; overflow: hidden;" id="permisos-container">
+  <div style="padding: 40px; text-align: center; color: var(--text-muted);" id="permisos-empty-state">
+    <svg viewBox="0 0 24 24" width="48" height="48" stroke="currentColor" stroke-width="1" fill="none" style="margin-bottom: 12px; opacity: 0.5;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+    <p>Seleccione un rol para configurar sus permisos</p>
+  </div>
+  
+  <div class="table-container" style="overflow-x: auto; display: none;" id="permisos-table-container">
+    <table class="table is-fullwidth is-hoverable is-striped" style="margin-bottom: 0;">
+      <thead style="background: var(--dark, #1f2937); color: #fff;">
+        <tr>
+          <th style="color: #fff; font-size: 0.8rem; text-transform: uppercase;">Módulo / Objeto</th>
+          <th style="color: #fff; font-size: 0.8rem; text-transform: uppercase;" class="has-text-centered">Ver</th>
+          <th style="color: #fff; font-size: 0.8rem; text-transform: uppercase;" class="has-text-centered">Insertar</th>
+          <th style="color: #fff; font-size: 0.8rem; text-transform: uppercase;" class="has-text-centered">Editar</th>
+          <th style="color: #fff; font-size: 0.8rem; text-transform: uppercase;" class="has-text-centered">Eliminar</th>
+        </tr>
+      </thead>
+      <tbody id="permisos-table-body">
+        <!-- Permisos render here -->
+      </tbody>
+    </table>
+  </div>
+</div>

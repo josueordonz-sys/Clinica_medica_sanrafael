@@ -1,0 +1,47 @@
+<div class="glass-card">
+        <div class="card-header-flex">
+          <div>
+            <h2 class="card-title">
+              <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-width="2">
+                <path d="M4 4h16v16H4z" />
+                <path d="M8 8h8" />
+                <path d="M8 12h8" />
+                <path d="M8 16h5" />
+              </svg>
+              Expedientes Clínicos
+            </h2>
+            <p style="margin:6px 0 0 0;color:var(--text-muted);font-size:.9rem;">
+              Historial completo de consultas registradas.
+            </p>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <span id="expedientes-count" style="font-size:.85rem;color:var(--text-muted);">0 consulta(s)</span>
+            <button type="button" class="btn btn-secondary" id="btn-expedientes-recargar">Actualizar</button>
+          </div>
+        </div>
+
+        <div style="margin:18px 0;">
+          <input
+            type="text"
+            id="expediente-search"
+            class="form-input"
+            placeholder="Buscar por DNI, paciente, médico o motivo..."
+            style="max-width:520px;"
+          >
+        </div>
+
+        <div style="display:grid;grid-template-columns:minmax(280px,380px) 1fr;gap:18px;align-items:start;">
+          <div>
+            <h3 style="font-size:.95rem;margin-bottom:12px;font-weight:700;">Consultas registradas</h3>
+            <div class="patient-selector-list" id="expedientes-list" style="max-height:650px;">
+              <!-- Dinámico -->
+            </div>
+          </div>
+          <div class="glass-card" id="expediente-detail" style="padding:20px;background-color:var(--bg-primary);">
+            <div style="padding:48px;text-align:center;color:var(--text-muted);">
+              Seleccione una consulta para ver el expediente.
+            </div>
+          </div>
+        </div>
+      </div>
+</body>

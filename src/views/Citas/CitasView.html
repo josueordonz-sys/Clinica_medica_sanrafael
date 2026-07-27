@@ -1,0 +1,200 @@
+<div class="glass-card" style="margin-bottom: 24px;">
+  <div class="card-header-flex">
+    <h2 class="card-title">
+      <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-width="2">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+      </svg>
+      Gestión de Citas
+    </h2>
+    <span style="font-size: 0.85rem; color: var(--text-muted);">Módulo: Recepción / Citas</span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px; margin-top: 16px;">
+    
+    <!-- Lado Izquierdo: Formulario de Nueva Cita -->
+    <div style="background: var(--bg-primary); padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+      <h3 style="margin-bottom: 16px; font-size: 1.1rem; color: var(--primary);">Agendar Nueva Cita</h3>
+      <form id="form-crear-cita">
+        <div class="form-group">
+          <label class="form-label" for="cita-buscar-dni">Buscar Paciente por N° de Identidad <span class="required">*</span></label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="cita-buscar-dni" class="form-input" placeholder="Ej: 0801-1990-01234" maxlength="15" style="flex:1;">
+            <button type="button" id="btn-buscar-paciente-cita" class="btn btn-secondary" style="white-space:nowrap; padding: 0 14px;">
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" style="vertical-align:middle;">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              Buscar
+            </button>
+          </div>
+          <div id="cita-paciente-resultado" style="margin-top: 8px; padding: 10px 12px; border-radius: var(--radius-md); background: var(--bg-secondary); border: 1px solid var(--border-color); font-size: 0.88rem; display: none;">
+            <span id="cita-nombre-paciente" style="font-weight: 600; color: var(--text-primary);"></span>
+            <span style="color: var(--text-muted); margin-left: 8px;" id="cita-paciente-info"></span>
+          </div>
+          <input type="hidden" id="cita-paciente-dni">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="cita-especialidad">Especialidad Médica <span class="required">*</span></label>
+          <select id="cita-especialidad" class="form-input" required>
+            <option value="" disabled selected>Seleccione especialidad</option>
+            <option value="Medicina General">Medicina General</option>
+            <option value="Cardiología">Cardiología</option>
+            <option value="Pediatría">Pediatría</option>
+            <option value="Ginecología">Ginecología</option>
+            <option value="Dermatología">Dermatología</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cita-medico">Médico Especialista <span class="required">*</span></label>
+          <select id="cita-medico" class="form-input" required disabled>
+            <option value="" disabled selected>Eliga especialidad primero</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cita-fecha">Fecha de la Cita <span class="required">*</span></label>
+          <input type="date" id="cita-fecha" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cita-hora">Hora de la Cita <span class="required">*</span></label>
+          <select id="cita-hora" class="form-input" required>
+            <option value="" disabled selected>Seleccione horario</option>
+            <option value="08:00 - 08:30">08:00 - 08:30</option>
+            <option value="08:30 - 09:00">08:30 - 09:00</option>
+            <option value="09:00 - 09:30">09:00 - 09:30</option>
+            <option value="09:30 - 10:00">09:30 - 10:00</option>
+            <option value="10:00 - 10:30">10:00 - 10:30</option>
+            <option value="10:30 - 11:00">10:30 - 11:00</option>
+            <option value="11:00 - 11:30">11:00 - 11:30</option>
+            <option value="13:00 - 13:30">13:00 - 13:30</option>
+            <option value="13:30 - 14:00">13:30 - 14:00</option>
+            <option value="14:00 - 14:30">14:00 - 14:30</option>
+            <option value="14:30 - 15:00">14:30 - 15:00</option>
+            <option value="15:00 - 15:30">15:00 - 15:30</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cita-monto">Monto Consulta (L.)</label>
+          <input type="number" id="cita-monto" class="form-input" value="800" min="0" step="50" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cita-observaciones">Observaciones de Recepción</label>
+          <textarea id="cita-observaciones" class="form-input" rows="2" placeholder="Motivo inicial..."></textarea>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" id="btn-cancelar-cita">Limpiar</button>
+          <button type="submit" class="btn btn-success" id="btn-agendar-cita" data-perm-action="insertar" disabled>Agendar Cita</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Lado Derecho: Lista de Citas -->
+    <div style="background: var(--bg-primary); padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--border-color); display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 1.1rem; color: var(--primary); margin: 0;">Citas Agendadas</h3>
+        <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+          <!-- Filtro por Fecha -->
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <label for="filtro-citas-fecha" style="font-size: 0.85rem; color: var(--text-muted); white-space: nowrap;">Fecha:</label>
+            <input type="date" id="filtro-citas-fecha" class="form-input" style="padding: 4px 8px; font-size: 0.85rem; width: auto; display: inline-block;">
+          </div>
+          <!-- Filtro por DNI -->
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <label for="filtro-citas-dni" style="font-size: 0.85rem; color: var(--text-muted); white-space: nowrap;">DNI:</label>
+            <div style="display: flex; align-items: center; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 4px 10px; gap: 6px;">
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" style="color: var(--text-muted); flex-shrink:0;">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input type="text" id="filtro-citas-dni" placeholder="Buscar por identidad..." style="border:none; background:transparent; font-size:0.85rem; color:var(--text-primary); outline:none; width:160px;">
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div style="overflow-x: auto; flex: 1;">
+        <table class="table-sirec" style="width: 100%; font-size: 0.9rem;">
+          <thead>
+            <tr style="text-align: left; border-bottom: 2px solid var(--border-color);">
+              <th style="padding: 8px;">Hora</th>
+              <th style="padding: 8px;">Paciente</th>
+              <th style="padding: 8px;">Médico</th>
+              <th style="padding: 8px;">Estado</th>
+              <th style="padding: 8px; text-align: center;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-citas-body">
+            <!-- Renderizado dinámico -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<!-- Modal Edición -->
+<div class="modal-overlay" id="modal-editar-cita" style="display: none;">
+  <div class="modal-content" style="max-width: 500px;">
+    <div class="card-header-flex">
+      <h2 class="card-title">Editar Cita</h2>
+      <button id="btn-cerrar-modal-editar" style="background: none; border: none; cursor: pointer; color: var(--text-muted);">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+    <form id="form-editar-cita" style="margin-top: 16px;">
+      <input type="hidden" id="edit-cita-id">
+      <div class="form-group">
+        <label class="form-label" for="edit-cita-especialidad">Especialidad</label>
+        <select id="edit-cita-especialidad" class="form-input" required>
+          <option value="Medicina General">Medicina General</option>
+          <option value="Cardiología">Cardiología</option>
+          <option value="Pediatría">Pediatría</option>
+          <option value="Ginecología">Ginecología</option>
+          <option value="Dermatología">Dermatología</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="edit-cita-medico">Médico</label>
+        <select id="edit-cita-medico" class="form-input" required></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="edit-cita-fecha">Fecha</label>
+        <input type="date" id="edit-cita-fecha" class="form-input" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="edit-cita-hora">Hora</label>
+        <select id="edit-cita-hora" class="form-input" required>
+          <option value="08:00 - 08:30">08:00 - 08:30</option>
+          <option value="08:30 - 09:00">08:30 - 09:00</option>
+          <option value="09:00 - 09:30">09:00 - 09:30</option>
+          <option value="09:30 - 10:00">09:30 - 10:00</option>
+          <option value="10:00 - 10:30">10:00 - 10:30</option>
+          <option value="10:30 - 11:00">10:30 - 11:00</option>
+          <option value="11:00 - 11:30">11:00 - 11:30</option>
+          <option value="13:00 - 13:30">13:00 - 13:30</option>
+          <option value="13:30 - 14:00">13:30 - 14:00</option>
+          <option value="14:00 - 14:30">14:00 - 14:30</option>
+          <option value="14:30 - 15:00">14:30 - 15:00</option>
+          <option value="15:00 - 15:30">15:00 - 15:30</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="edit-cita-monto">Monto Consulta (L.)</label>
+        <input type="number" id="edit-cita-monto" class="form-input" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="edit-cita-observaciones">Observaciones</label>
+        <textarea id="edit-cita-observaciones" class="form-input" rows="2"></textarea>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+        <button type="button" class="btn btn-secondary" id="btn-cancelar-edicion">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+      </div>
+    </form>
+  </div>
+</div>

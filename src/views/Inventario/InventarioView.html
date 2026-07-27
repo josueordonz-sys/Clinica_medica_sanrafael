@@ -1,0 +1,64 @@
+<div class="glass-card">
+        <div class="card-header-flex">
+          <h2 class="card-title">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-width="2">
+              <path
+                d="M21 8a2 2 0 0 0-1-1.73L13 2.27a2 2 0 0 0-2 0L4 6.27A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+              <path d="M3.3 7 12 12l8.7-5" />
+              <path d="M12 22V12" />
+            </svg>
+            Inventario de Medicamentos
+          </h2>
+          <span style="font-size: 0.85rem; color: var(--text-muted);">Colección: medicamentos</span>
+        </div>
+
+        <form id="form-medicamento">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="med-id">Código / Código de Barra</label>
+              <input type="text" id="med-id" class="form-input" placeholder="Autogenerado si se deja vacío">
+            </div>
+            <div class="form-group col-span-2">
+              <label class="form-label" for="med-nombre">Nombre del Medicamento <span class="required">*</span></label>
+              <input type="text" id="med-nombre" class="form-input" required placeholder="Ej. Losartán 50mg">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="med-present">Presentación</label>
+              <input type="text" id="med-present" class="form-input" placeholder="Ej. Caja 30 tabs">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="med-stock">Stock Actual <span class="required">*</span></label>
+              <input type="number" id="med-stock" class="form-input" min="0" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="med-precio">Precio de Venta (L.) <span class="required">*</span></label>
+              <input type="number" id="med-precio" class="form-input" min="0" step="0.01" required>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:12px; margin-top: 20px;">
+            <button type="reset" class="btn btn-secondary">Limpiar</button>
+            <button type="submit" class="btn btn-primary">Guardar Medicamento</button>
+          </div>
+        </form>
+
+        <h3
+          style="margin-top: 32px; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
+          Stock Actual</h3>
+        <div class="table-container">
+          <table class="app-table" id="tabla-inventario-medicamentos">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Medicamento</th>
+                <th>Stock</th>
+                <th>Precio Venta</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+</body>

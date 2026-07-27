@@ -1,0 +1,100 @@
+<div class="glass-card">
+        <div class="card-header-flex">
+          <h2 class="card-title">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+            </svg>
+            Monitor de Triaje y Signos Vitales
+          </h2>
+          <span style="font-size: 0.85rem; color: var(--text-muted);">Módulo: Enfermería</span>
+        </div>
+
+        <div class="consultation-layout">
+          <!-- Columna Izquierda: Cola de Triage -->
+          <div>
+            <h3 style="font-size: 0.95rem; margin-bottom: 12px; font-weight: 700;">Cola de Espera (Triaje)</h3>
+            <div class="patient-selector-list" id="triage-cola-pacientes">
+              <!-- Dinámico -->
+            </div>
+          </div>
+
+          <!-- Columna Derecha: Formulario de Signos Vitales -->
+          <div>
+            <form id="form-triaje-signos" style="display: none;">
+              <h3
+                style="font-size: 1.1rem; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;"
+                id="triage-form-titulo">Paciente: -</h3>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label" for="triage-dni">DNI del Paciente</label>
+                  <input type="text" id="triage-dni" class="form-input" readonly>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="triage-presion">Presión Arterial <span
+                      class="required">*</span></label>
+                  <input type="text" id="triage-presion" class="form-input" placeholder="Ej. 120/80" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="triage-temperatura">Temperatura (°C) <span
+                      class="required">*</span></label>
+                  <input type="number" id="triage-temperatura" class="form-input" min="34" max="42" step="0.1"
+                    placeholder="Ej. 36.5" required>
+                  <span class="input-feedback">La temperatura debe estar entre 34°C y 42°C.</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="triage-cardiaca">Frecuencia Cardíaca (BPM)</label>
+                  <input type="number" id="triage-cardiaca" class="form-input" min="40" max="200" placeholder="BPM">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="triage-respiratoria">Frecuencia Respiratoria (RPM)</label>
+                  <input type="number" id="triage-respiratoria" class="form-input" min="8" max="50" placeholder="RPM">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="triage-peso">Peso (kg) <span class="required">*</span></label>
+                  <input type="number" id="triage-peso" class="form-input" step="0.1" min="1" placeholder="Ej. 70"
+                    required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="triage-estatura">Estatura (cm) <span class="required">*</span></label>
+                  <input type="number" id="triage-estatura" class="form-input" min="50" max="250" placeholder="Ej. 175"
+                    required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="triage-imc">Índice de Masa Corporal (IMC)</label>
+                  <div style="display: flex; gap: 8px; align-items: center;">
+                    <input type="text" id="triage-imc" class="form-input" readonly placeholder="Auto-calculado">
+                    <span id="triage-imc-tag" class="imc-badge" style="display:none;">Normal</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="triage-oxigeno">Saturación de Oxígeno (%)</label>
+                  <input type="number" id="triage-oxigeno" class="form-input" min="50" max="100" placeholder="Ej. 98">
+                </div>
+                <div class="form-group col-span-2">
+                  <label class="form-label">Nivel de Dolor (1 - 10)</label>
+                  <div class="slider-group">
+                    <input type="range" id="triage-dolor" class="pain-slider" min="1" max="10" value="1">
+                    <span class="pain-label" id="triage-dolor-lbl">1</span>
+                    <span class="pain-text" id="triage-dolor-desc">Sin Dolor</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+                <button type="submit" class="btn btn-primary" data-perm-action="insertar">Guardar y Enviar a Médico</button>
+              </div>
+            </form>
+
+            <div id="triage-sin-seleccion" style="padding: 40px; text-align: center; color: var(--text-muted);">
+              <svg viewBox="0 0 24 24" width="48" height="48" stroke="currentColor" fill="none" stroke-width="2"
+                style="margin-bottom: 12px; opacity: 0.5;">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 8v4" />
+                <path d="M12 16h.01" />
+              </svg>
+              <p>Seleccione un paciente de la cola para proceder.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+</body>

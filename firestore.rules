@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserRole() {
+      return request.auth.token.role;
+    }
+
+    // Módulo 1: Registro Único de Pacientes
+    // Lectura permitida para recepción, enfermería y doctores. Escritura exclusiva para recepción/administración.
+    match /pacientes/{pacienteId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (getUserRole() == 'Recepcionista' || getUserRole() == 'Administrador');
+    }
+
+    // Módulo 2: Citas y Pagos (Caja)
+    // Cajeros y administración crean y modifican citas. Enfermeros y doctores sólo leen.
+    match /citas/{citaId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && (getUserRole() == 'Recepcionista' || getUserRole() == 'Administrador');
+      allow delete: if isAuthenticated() && getUserRole() == 'Administrador';
+    }
+
+    // Módulo 3: Triaje y Signos Vitales
+    // Enfermeras registran y actualizan. Médicos leen.
+    match /triajes/{triageId} {
+      allow read: if isAuthenticated() && (getUserRole() == 'Enfermeria' || getUserRole() == 'Medico' || getUserRole() == 'Administrador');
+      allow write: if isAuthenticated() && (getUserRole() == 'Enfermeria' || getUserRole() == 'Administrador');
+    }
+
+    // Módulo 4: Consulta Médica e Historial Clínico
+    // Lectura para médicos, enfermería (sólo antecedentes/generales) y administración.
+    // Escritura exclusiva de médicos especialistas (con bloqueo simulado en cliente).
+    match /consultas/{consultaId} {
+      allow read: if isAuthenticated() && (getUserRole() == 'Medico' || getUserRole() == 'Enfermeria' || getUserRole() == 'Administrador');
+      allow write: if isAuthenticated() && (getUserRole() == 'Medico' || getUserRole() == 'Administrador');
+    }
+  }
+}
