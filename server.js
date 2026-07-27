@@ -54,6 +54,7 @@ function sanitizeInput(value) {
 const allowedOrigins = new Set([
   'http://127.0.0.1:3000',
   'http://localhost:3000',
+  'https://web-production-e8a98.up.railway.app',
   'http://127.0.0.1:5502',
   'http://127.0.0.1:5503',
   'http://localhost:5502',
