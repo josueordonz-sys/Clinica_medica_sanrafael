@@ -52,6 +52,8 @@ function sanitizeInput(value) {
 }
 
 const allowedOrigins = new Set([
+  'http://127.0.0.1:3000',
+  'http://localhost:3000',
   'http://127.0.0.1:5502',
   'http://127.0.0.1:5503',
   'http://localhost:5502',
@@ -176,6 +178,10 @@ function normalizeSex(value = '') {
   const normalized = String(value).trim().toLowerCase();
   if (normalized === 'f' || normalized.startsWith('femen')) return 'F';
   return 'M';
+}
+
+function normalizeDni(value = '') {
+  return String(value || '').replace(/\D/g, '');
 }
 
 function parseAppointmentId(id) {
@@ -1978,10 +1984,15 @@ app.get('/api/medicos/public', async (req, res) => {
 });
 
 app.post('/api/pacientes/registro', async (req, res) => {
-  const { dni, correo, primerNombre, segundoNombre, primerApellido, segundoApellido, fechaNacimiento, genero, telefono, password, direccion, tipoSangre, contactoEmergencia, alergias } = req.body;
+  const { correo, primerNombre, segundoNombre, primerApellido, segundoApellido, fechaNacimiento, genero, telefono, password, direccion, tipoSangre, contactoEmergencia, alergias } = req.body;
+  const dni = normalizeDni(req.body.dni);
 
   if (!dni || !primerNombre || !primerApellido || !password || !fechaNacimiento || !genero || !telefono) {
     return res.status(400).json({ message: 'Todos los campos marcados como requeridos (*) son obligatorios.' });
+  }
+
+  if (dni.length !== 13) {
+    return res.status(400).json({ message: 'El DNI debe contener exactamente 13 numeros.' });
   }
 
   let connection;

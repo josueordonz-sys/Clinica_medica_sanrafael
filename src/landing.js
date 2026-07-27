@@ -23,6 +23,30 @@ document.addEventListener('DOMContentLoaded', () => {
     return data;
   };
 
+  const getValue = (id) => document.getElementById(id)?.value?.trim() || '';
+
+  const splitNameParts = (value) => {
+    const parts = String(value || '').trim().split(/\s+/).filter(Boolean);
+    return {
+      first: parts.shift() || '',
+      rest: parts.join(' ')
+    };
+  };
+
+  const getRegistrationNames = () => {
+    const oldNames = splitNameParts(getValue('reg-nombres'));
+    const oldLastNames = splitNameParts(getValue('reg-apellidos'));
+
+    return {
+      primerNombre: getValue('reg-primer-nombre') || oldNames.first,
+      segundoNombre: getValue('reg-segundo-nombre') || oldNames.rest,
+      primerApellido: getValue('reg-primer-apellido') || oldLastNames.first,
+      segundoApellido: getValue('reg-segundo-apellido') || oldLastNames.rest
+    };
+  };
+
+  const normalizeDni = (value) => String(value || '').replace(/\D/g, '');
+
   // Manejo del Navbar Burger (Mobile)
   const navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
   if (navbarBurgers.length > 0) {
@@ -472,42 +496,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Validar que nombres y apellidos solo contengan letras y espacios
       const soloLetrasRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/;
+      const registrationNames = getRegistrationNames();
       const camposTexto = [
-        { id: 'reg-primer-nombre', label: 'Primer Nombre', required: true },
-        { id: 'reg-segundo-nombre', label: 'Segundo Nombre', required: false },
-        { id: 'reg-primer-apellido', label: 'Primer Apellido', required: true },
-        { id: 'reg-segundo-apellido', label: 'Segundo Apellido', required: false }
+        { id: 'reg-primer-nombre', value: registrationNames.primerNombre, label: 'Primer Nombre', required: true },
+        { id: 'reg-segundo-nombre', value: registrationNames.segundoNombre, label: 'Segundo Nombre', required: false },
+        { id: 'reg-primer-apellido', value: registrationNames.primerApellido, label: 'Primer Apellido', required: true },
+        { id: 'reg-segundo-apellido', value: registrationNames.segundoApellido, label: 'Segundo Apellido', required: false }
       ];
 
       for (const campo of camposTexto) {
-        const valor = document.getElementById(campo.id)?.value?.trim() || '';
+        const valor = campo.value;
         if (campo.required && !valor) {
           alert(`El campo "${campo.label}" es obligatorio.`);
-          document.getElementById(campo.id)?.focus();
+          (document.getElementById(campo.id) || document.getElementById(campo.id.includes('nombre') ? 'reg-nombres' : 'reg-apellidos'))?.focus();
           return;
         }
         if (valor && !soloLetrasRegex.test(valor)) {
           alert(`El campo "${campo.label}" solo permite letras y espacios. No se permiten números ni caracteres especiales.`);
-          document.getElementById(campo.id)?.focus();
+          (document.getElementById(campo.id) || document.getElementById(campo.id.includes('nombre') ? 'reg-nombres' : 'reg-apellidos'))?.focus();
           return;
         }
       }
 
+      const dni = normalizeDni(getValue('reg-dni'));
+      if (dni.length !== 13) {
+        alert('El DNI debe contener exactamente 13 números.');
+        document.getElementById('reg-dni')?.focus();
+        return;
+      }
+
       const payload = {
-        dni: document.getElementById('reg-dni').value,
-        correo: document.getElementById('reg-correo')?.value || '',
-        primerNombre: document.getElementById('reg-primer-nombre').value,
-        segundoNombre: document.getElementById('reg-segundo-nombre')?.value || '',
-        primerApellido: document.getElementById('reg-primer-apellido').value,
-        segundoApellido: document.getElementById('reg-segundo-apellido')?.value || '',
-        fechaNacimiento: document.getElementById('reg-fecnac').value,
-        genero: document.getElementById('reg-genero').value,
-        telefono: document.getElementById('reg-telefono').value,
-        password: document.getElementById('reg-password').value,
-        direccion: document.getElementById('reg-direccion')?.value || '',
-        tipoSangre: document.getElementById('reg-tiposangre')?.value || 'No sabe',
-        contactoEmergencia: document.getElementById('reg-contacto_emergencia')?.value || '',
-        alergias: document.getElementById('reg-alergias')?.value || ''
+        dni,
+        correo: getValue('reg-correo'),
+        primerNombre: registrationNames.primerNombre,
+        segundoNombre: registrationNames.segundoNombre,
+        primerApellido: registrationNames.primerApellido,
+        segundoApellido: registrationNames.segundoApellido,
+        fechaNacimiento: getValue('reg-fecnac'),
+        genero: getValue('reg-genero'),
+        telefono: getValue('reg-telefono'),
+        password: getValue('reg-password'),
+        direccion: getValue('reg-direccion'),
+        tipoSangre: getValue('reg-tiposangre') || 'No sabe',
+        contactoEmergencia: getValue('reg-contacto_emergencia'),
+        alergias: getValue('reg-alergias')
       };
 
       try {
