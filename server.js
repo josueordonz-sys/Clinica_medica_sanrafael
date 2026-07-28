@@ -11,8 +11,8 @@ const BCRYPT_SALT_ROUNDS = 10;
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 app.use(express.static(require('path').join(__dirname, 'public')));
 app.use('/src', express.static(require('path').join(__dirname, 'src')));
@@ -160,6 +160,23 @@ async function ensurePatientSchema(connection = pool) {
     await connection.execute('ALTER TABLE PACIENTES ADD COLUMN pac_activo TINYINT(1) NOT NULL DEFAULT 1');
     console.log('Columna PACIENTES.pac_activo creada correctamente.');
     columns = await getPatientColumns(connection);
+  }
+
+  return columns;
+}
+
+async function getEmployeeColumns(connection = pool) {
+  const [rows] = await connection.execute('SHOW COLUMNS FROM EMPLEADOS');
+  return new Set(rows.map((row) => row.Field));
+}
+
+async function ensureEmployeeSchema(connection = pool) {
+  let columns = await getEmployeeColumns(connection);
+
+  if (!columns.has('emp_firma')) {
+    await connection.execute('ALTER TABLE EMPLEADOS ADD COLUMN emp_firma LONGTEXT DEFAULT NULL');
+    console.log('Columna EMPLEADOS.emp_firma creada correctamente.');
+    columns = await getEmployeeColumns(connection);
   }
 
   return columns;
@@ -646,6 +663,7 @@ app.post('/api/reset-password', async (req, res) => {
 // ============================================================
 app.get('/api/empleados', async (req, res) => {
   try {
+    await ensureEmployeeSchema();
     const [rows] = await pool.execute(`
       SELECT
         e.emp_id AS id,
@@ -661,7 +679,8 @@ app.get('/api/empleados', async (req, res) => {
         COALESCE(esp.esp_nombre, '') AS especialidad,
         COALESCE(esp.esp_id, NULL) AS esp_id,
         e.emp_activo AS activo,
-        e.emp_foto AS foto
+        e.emp_foto AS foto,
+        e.emp_firma AS firma
       FROM EMPLEADOS e
       INNER JOIN ROLES r ON r.rol_id = e.rol_id
       LEFT JOIN ESPECIALIDADES esp ON esp.esp_id = e.esp_id
@@ -681,7 +700,7 @@ app.get('/api/empleados', async (req, res) => {
 });
 
 app.post('/api/empleados', async (req, res) => {
-  const { dni, pnom, snom, pape, sape, email, tel, password, role, especialidad, foto } = req.body;
+  const { dni, pnom, snom, pape, sape, email, tel, password, role, especialidad, foto, firma } = req.body;
 
   if (!dni || !pnom || !pape || !email || !password || !role) {
     return res.status(400).json({
@@ -692,6 +711,7 @@ app.post('/api/empleados', async (req, res) => {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
+    await ensureEmployeeSchema(connection);
 
     const roleId = await getOrCreateRoleId(role, connection);
     let specialtyId = null;
@@ -714,9 +734,9 @@ app.post('/api/empleados', async (req, res) => {
     const [result] = await connection.execute(
       `INSERT INTO EMPLEADOS (
         emp_dni, emp_pnom, emp_snom, emp_pape, emp_sape,
-        emp_email, emp_tel, emp_password, rol_id, esp_id, emp_activo, emp_foto
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)`,
-      [dni, pnom, snom || null, pape, sape || null, email, tel || null, await bcrypt.hash(password, BCRYPT_SALT_ROUNDS), roleId, specialtyId, foto || null]
+        emp_email, emp_tel, emp_password, rol_id, esp_id, emp_activo, emp_foto, emp_firma
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`,
+      [dni, pnom, snom || null, pape, sape || null, email, tel || null, await bcrypt.hash(password, BCRYPT_SALT_ROUNDS), roleId, specialtyId, foto || null, firma || null]
     );
 
     await connection.commit();
@@ -737,7 +757,7 @@ app.post('/api/empleados', async (req, res) => {
 
 app.put('/api/empleados/:id', async (req, res) => {
   const empId = req.params.id;
-  const { dni, pnom, snom, pape, sape, email, tel, password, role, especialidad, foto } = req.body;
+  const { dni, pnom, snom, pape, sape, email, tel, password, role, especialidad, foto, firma } = req.body;
 
   if (!dni || !pnom || !pape || !email || !role) {
     return res.status(400).json({
@@ -748,6 +768,7 @@ app.put('/api/empleados/:id', async (req, res) => {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
+    await ensureEmployeeSchema(connection);
 
     const roleId = await getOrCreateRoleId(role, connection);
     let specialtyId = null;
@@ -777,6 +798,11 @@ app.put('/api/empleados/:id', async (req, res) => {
     if (foto !== undefined) {
       sql += `, emp_foto = ?`;
       params.push(foto || null);
+    }
+
+    if (firma !== undefined) {
+      sql += `, emp_firma = ?`;
+      params.push(firma || null);
     }
 
     if (password) {
@@ -2298,9 +2324,11 @@ app.put('/api/citas/:id/cancelar', async (req, res) => {
 
 app.get('/api/pacientes/:dni/expedientes', async (req, res) => {
   try {
+    await ensureEmployeeSchema();
     const [rows] = await pool.execute(`
       SELECT ex.*, c.cit_fecha, c.cit_hora, c.pac_dni,
              CONCAT_WS(' ', e.emp_pnom, e.emp_pape) AS medico,
+             e.emp_firma AS medico_firma,
              es.esp_nombre AS especialidad,
              cie.cie_desc,
              ts.tri_presart, ts.tri_temp, ts.tri_imc, ts.tri_dolor,
@@ -2402,7 +2430,8 @@ app.listen(port, async () => {
   await testDatabaseConnection();
   try {
     await ensurePatientSchema();
+    await ensureEmployeeSchema();
   } catch (error) {
-    console.error('Error verificando esquema de PACIENTES:', error.message);
+    console.error('Error verificando esquema de base de datos:', error.message);
   }
 });

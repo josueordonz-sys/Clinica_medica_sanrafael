@@ -258,7 +258,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const dateFormatted = new Date(exp.con_fecha).toLocaleDateString('es-HN', {
       year: 'numeric', month: 'long', day: 'numeric'
     });
-    const fechaCita = new Date(exp.cit_fecha).toLocaleDateString('es-HN');
+    const getStoredDoctorSignature = (doctorName = '') => {
+      try {
+        const empleados = JSON.parse(localStorage.getItem('sirec_empleados') || '[]');
+        const normalizedDoctor = String(doctorName).toLowerCase().trim();
+        const doctor = empleados.find(e => {
+          const fullName = `${e.pnom || ''} ${e.snom || ''} ${e.pape || ''} ${e.sape || ''}`.toLowerCase().trim();
+          const shortName = `${e.pnom || ''} ${e.pape || ''}`.toLowerCase().trim();
+          return fullName.includes(normalizedDoctor) || normalizedDoctor.includes(shortName);
+        });
+        return doctor?.firma || '';
+      } catch (error) {
+        return '';
+      }
+    };
+
+    const medicoFirma = exp.medico_firma || getStoredDoctorSignature(exp.medico);
 
     // Receta / medicamentos
     const receta = exp.receta || [];
@@ -271,15 +286,23 @@ document.addEventListener('DOMContentLoaded', () => {
       </tr>
     `).join('') : `<tr><td colspan="4" style="padding:12px 4px;color:#94a3b8;text-align:center;">Sin medicamentos prescritos</td></tr>`;
 
-    // Exámenes ordenados
-    const examenesText = exp.con_examenes ? exp.con_examenes.trim() : '';
-    const examenesSection = examenesText ? `
+    const examenes = (() => {
+      if (!exp.con_examenes) return [];
+      try {
+        const parsed = JSON.parse(exp.con_examenes);
+        if (Array.isArray(parsed)) return parsed.filter(Boolean);
+      } catch (error) {
+        // Si viene texto plano, se procesa abajo.
+      }
+      return String(exp.con_examenes).split(/[\n,]+/).map(e => e.trim()).filter(Boolean);
+    })();
+    const examenesSection = examenes.length > 0 ? `
       <div style="margin-top:20px;">
         <h4 style="border-bottom:1px solid #1e3a8a;padding-bottom:4px;margin-bottom:8px;color:#1e3a8a;">
           EXÁMENES DE LABORATORIO / GABINETE
         </h4>
         <ul style="padding-left:20px;margin:0;font-size:.9rem;">
-          ${examenesText.split(/[\n,]+/).filter(Boolean).map(e => `<li>${e.trim()}</li>`).join('')}
+          ${examenes.map(e => `<li>${e}</li>`).join('')}
         </ul>
       </div>
     ` : '';
@@ -375,7 +398,9 @@ document.addEventListener('DOMContentLoaded', () => {
         <!-- FIRMA MÉDICO -->
         <div style="margin-top:60px;display:flex;justify-content:flex-end;padding-right:40px;">
           <div style="text-align:center;width:240px;">
-            <div style="height:60px;"></div>
+            ${medicoFirma
+              ? `<img src="${medicoFirma}" alt="Firma" style="max-width:200px;max-height:80px;object-fit:contain;display:block;margin:0 auto 4px;">`
+              : '<div style="height:80px;"></div>'}
             <div style="border-top:1px solid #1e293b;padding-top:8px;font-size:.85rem;">
               <strong>${exp.medico}</strong><br>
               <span style="font-size:.78rem;color:#64748b;">Médico Autorizado | ${exp.especialidad}</span>
@@ -416,30 +441,56 @@ document.addEventListener('DOMContentLoaded', () => {
         styleEl.id = 'dynamic-print-style';
         document.head.appendChild(styleEl);
       }
-      
-      if (confirm("¿Desea imprimir en formato de Ticket Térmico de 80mm? (Pulse Cancelar para tamaño normal A4 o Carta)")) {
-        document.body.classList.add('print-thermal');
-        styleEl.innerHTML = `
-          @media print {
-            @page { size: 80mm auto; margin: 0; }
-            .ticket-print { max-width: 80mm !important; padding: 5mm !important; }
-            .ticket-print > div > div { display: block !important; }
-            .ticket-print h1 { font-size: 1.1rem !important; text-align: center; }
-            .ticket-print h2 { font-size: 1rem !important; text-align: center; margin-top: 10px !important; }
-            .ticket-print p { font-size: 0.75rem !important; text-align: center; }
-            .ticket-print table { font-size: 0.75rem !important; width: 100% !important; }
-            .ticket-print .flex-1 { margin-bottom: 10px; }
+      document.body.classList.remove('print-thermal');
+      styleEl.innerHTML = `
+        @media print {
+          @page { size: letter; margin: 1cm; }
+          html, body {
+            background: #fff !important;
+            height: auto !important;
+            overflow: visible !important;
           }
-        `;
-      } else {
-        document.body.classList.remove('print-thermal');
-        styleEl.innerHTML = `
-          @media print {
-            @page { size: letter; margin: 1cm; }
-            .ticket-print { zoom: 1.25; max-width: 100% !important; width: 100% !important; }
+          body > *:not(#modal-ticket) {
+            display: none !important;
           }
-        `;
-      }
+          #modal-ticket {
+            display: block !important;
+            position: static !important;
+            inset: auto !important;
+            overflow: visible !important;
+            background: transparent !important;
+          }
+          #modal-ticket .modal-background,
+          #modal-ticket .modal-card-head,
+          #modal-ticket .modal-card-foot {
+            display: none !important;
+          }
+          #modal-ticket .modal-card,
+          #modal-ticket .modal-card-body {
+            display: block !important;
+            position: static !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            height: auto !important;
+            max-height: none !important;
+            overflow: visible !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            border: 0 !important;
+            background: #fff !important;
+          }
+          #ticket-print-content,
+          #ticket-print-content > div {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            border: 0 !important;
+          }
+        }
+      `;
       setTimeout(() => window.print(), 150);
     });
   };
