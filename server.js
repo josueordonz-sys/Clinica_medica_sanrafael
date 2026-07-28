@@ -2334,7 +2334,7 @@ app.get('/api/pacientes/:dni/expedientes', async (req, res) => {
                  det.det_cantidad AS cantidad,
                  det.det_comprado AS comprado,
                  det.det_frechoras,
-                 m.med_precio AS precio_unitario
+                 m.med_precio_venta AS precio_unitario
           FROM DETALLE_RECETAS det
           LEFT JOIN MEDICAMENTOS m ON det.med_id = m.med_id
           WHERE det.rec_id = ?
