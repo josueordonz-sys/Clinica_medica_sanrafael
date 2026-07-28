@@ -4,6 +4,7 @@
    ========================================================================== */
 
 import { authService } from '../../services/authService.js';
+import { securityService } from '../../services/securityService.js';
 
 export class UsuariosView {
   constructor(router, showAlert, state) {
@@ -14,6 +15,7 @@ export class UsuariosView {
   }
 
   async mount() {
+    await this._loadRoles();
     await this._renderCards();
     if (!this._eventsAttached) {
       this._bindEvents();
@@ -22,8 +24,54 @@ export class UsuariosView {
   }
 
   async refresh() {
+    await this._loadRoles();
     await this._renderCards();
     await this._loadEspecialidades();
+  }
+
+  async _loadRoles() {
+    const roleSelect = document.getElementById('new-user-role');
+    const roleFilter = document.getElementById('filter-role-usuarios');
+    if (!roleSelect && !roleFilter) return;
+
+    const currentRole = roleSelect?.value || 'Administrador';
+    const currentFilter = roleFilter?.value || 'Todos';
+
+    try {
+      const roles = await securityService.getRoles();
+      const roleOptions = roles.map(r => {
+        const value = r.nombre;
+        const label = this._getRoleLabel(value);
+        return `<option value="${value}">${label}</option>`;
+      }).join('');
+
+      if (roleSelect) {
+        roleSelect.innerHTML = roleOptions;
+        roleSelect.value = roles.some(r => r.nombre === currentRole)
+          ? currentRole
+          : (roles[0]?.nombre || '');
+      }
+
+      if (roleFilter) {
+        roleFilter.innerHTML = `<option value="Todos">Todos</option>${roleOptions}`;
+        roleFilter.value = roles.some(r => r.nombre === currentFilter)
+          ? currentFilter
+          : 'Todos';
+      }
+    } catch (e) {
+      console.warn('No se pudieron cargar roles', e);
+    }
+  }
+
+  _getRoleLabel(role) {
+    const labels = {
+      Administrador: 'Administrador',
+      Recepcionista: 'Recepción / Caja',
+      Enfermeria: 'Triaje',
+      Medico: 'Consulta Médica',
+      Paciente: 'Paciente'
+    };
+    return labels[role] || role;
   }
 
   async _loadEspecialidades() {
@@ -45,6 +93,7 @@ export class UsuariosView {
 
     if (btnAdd && modal) {
       btnAdd.addEventListener('click', async () => {
+        await this._loadRoles();
         await this._loadEspecialidades();
         document.getElementById('modal-user-title').textContent = 'Crear Nuevo Usuario';
         document.getElementById('btn-submit-user').textContent = 'Crear Usuario';
@@ -55,7 +104,10 @@ export class UsuariosView {
         document.getElementById('contenedor-especialidad').style.display = 'none';
         document.getElementById('contenedor-foto').style.display = 'none';
         document.getElementById('contenedor-firma').style.display = 'none';
-        document.getElementById('new-user-role').value = 'Administrador';
+        const roleSelect = document.getElementById('new-user-role');
+        if (roleSelect && [...roleSelect.options].some(option => option.value === 'Administrador')) {
+          roleSelect.value = 'Administrador';
+        }
         this._clearSignatureCanvas();
         this._clearPhoto();
         modal.style.display = 'flex';
@@ -172,6 +224,7 @@ export class UsuariosView {
   }
 
   async _openEditModal(user) {
+    await this._loadRoles();
     await this._loadEspecialidades();
     const modal = document.getElementById('modal-user-form');
     document.getElementById('modal-user-title').textContent = 'Editar Usuario';
@@ -312,11 +365,11 @@ export class UsuariosView {
     if (!grid) return;
 
     const roleConfig = {
-      Administrador: { label: 'Administrador',      badge: 'danger',    accent: '#ef4444' },
-      Recepcionista: { label: 'Recepción / Caja',   badge: 'info',      accent: '#0ea5e9' },
-      Enfermeria:    { label: 'Triaje',             badge: 'warning',   accent: '#f59e0b' },
-      Medico:        { label: 'Consulta Médica',    badge: 'success',   accent: '#10b981' },
-      Paciente:      { label: 'Paciente',           badge: 'secondary', accent: '#64748b' }
+      Administrador: { badge: 'danger',    accent: '#ef4444' },
+      Recepcionista: { badge: 'info',      accent: '#0ea5e9' },
+      Enfermeria:    { badge: 'warning',   accent: '#f59e0b' },
+      Medico:        { badge: 'success',   accent: '#10b981' },
+      Paciente:      { badge: 'secondary', accent: '#64748b' }
     };
 
     try {
@@ -331,7 +384,7 @@ export class UsuariosView {
       }
 
       grid.innerHTML = users.map(u => {
-        const cfg     = roleConfig[u.role] || { label: u.role, badge: 'secondary', accent: '#64748b' };
+        const cfg     = roleConfig[u.role] || { badge: 'secondary', accent: '#64748b' };
         const initials = (u.name || u.email)
           .split(' ')
           .slice(0, 2)
@@ -380,7 +433,7 @@ export class UsuariosView {
 
             <!-- Rol -->
             <div>
-              <span class="badge badge-${cfg.badge}" style="font-size: 0.78rem;">${cfg.label}</span>
+              <span class="badge badge-${cfg.badge}" style="font-size: 0.78rem;">${this._getRoleLabel(u.role)}</span>
             </div>
 
             <!-- Acciones y Estado -->
