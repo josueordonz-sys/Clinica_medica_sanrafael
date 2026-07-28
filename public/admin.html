@@ -222,14 +222,14 @@
   </div>
 
   <div class="modal-overlay" id="modal-receta">
-    <div class="modal-content" style="max-width: 600px;">
+    <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
       <div class="glass-card"
         style="border: 1px dashed var(--border-color); background: #fff; color: #000; padding: 24px;"
         id="receta-print-content"></div>
       <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
         <button class="btn btn-secondary"
           onclick="document.getElementById('modal-receta').style.display='none'">Cerrar</button>
-        <button class="btn btn-primary" onclick="window.printDocument(false)">Imprimir Receta</button>
+        <button class="btn btn-primary" onclick="window.printDocument(false)">Imprimir / Guardar PDF</button>
       </div>
     </div>
   </div>

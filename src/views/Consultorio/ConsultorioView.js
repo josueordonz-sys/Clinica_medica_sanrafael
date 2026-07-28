@@ -438,73 +438,138 @@ export class ConsultorioView {
 
   _showPrescriptionModal(cons) {
     const receta = cons.receta || cons.medicamentos || [];
-    const medsRows = receta.map(m => `
-      <tr style="border-bottom:1px solid #ddd;">
-        <td style="padding:8px 0;"><strong>${m.nombre || m.farmaco}</strong></td>
-        <td style="padding:8px 0;">${m.dosis || `Cantidad: ${m.cantidad}`}</td>
-        <td style="padding:8px 0;text-align:right;">${m.duracion ? `${m.duracion} días` : ''} ${m.expira ? `- Expira: ${m.expira}` : ''}</td>
+    const medsRows = receta.length > 0 ? receta.map(m => `
+      <tr style="border-bottom:1px solid #e2e8f0;">
+        <td style="padding:8px 4px;"><strong>${m.nombre || m.farmaco || 'Medicamento'}</strong></td>
+        <td style="padding:8px 4px;">${m.dosis || '—'}</td>
+        <td style="padding:8px 4px;text-align:center;">${m.cantidad || 1}</td>
+        <td style="padding:8px 4px;text-align:right;">${m.duracion ? `${m.duracion} días` : '—'}</td>
       </tr>
-    `).join('');
+    `).join('') : `<tr><td colspan="4" style="padding:12px 4px;color:#94a3b8;text-align:center;">Sin medicamentos prescritos</td></tr>`;
 
-    const examsSection = (cons.examenes || []).length > 0 ? `
+    const examenes = Array.isArray(cons.examenes) ? cons.examenes : [];
+    const examsSection = examenes.length > 0 ? `
       <div style="margin-top:20px;">
-        <h4 style="border-bottom:1px solid #000;padding-bottom:4px;margin-bottom:6px;">EXÁMENES DE LABORATORIO</h4>
-        <ul style="padding-left:20px;">${cons.examenes.map(e => `<li>${e}</li>`).join('')}</ul>
+        <h4 style="border-bottom:1px solid #1e3a8a;padding-bottom:4px;margin-bottom:8px;color:#1e3a8a;">
+          EXÁMENES DE LABORATORIO / GABINETE
+        </h4>
+        <ul style="padding-left:20px;margin:0;font-size:.9rem;">
+          ${examenes.map(e => `<li>${e}</li>`).join('')}
+        </ul>
       </div>
     ` : '';
 
+    const triage = (this.state.triajes || []).find(t => t.citaId === cons.citaId || t.citaId === this._activeCita?.id);
+    const vitalesSection = triage ? `
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:16px;">
+        <h4 style="margin:0 0 10px 0;color:#475569;font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">
+          Signos Vitales (Triaje)
+        </h4>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:.85rem;">
+          ${triage.presion ? `<span><strong>P.A:</strong> ${triage.presion} mmHg</span>` : ''}
+          ${triage.temperatura ? `<span><strong>Temp:</strong> ${triage.temperatura} °C</span>` : ''}
+          ${triage.imc ? `<span><strong>IMC:</strong> ${triage.imc}</span>` : ''}
+          ${triage.peso ? `<span><strong>Peso:</strong> ${triage.peso} kg</span>` : ''}
+          ${triage.estatura ? `<span><strong>Talla:</strong> ${triage.estatura} cm</span>` : ''}
+          ${triage.oxigeno ? `<span><strong>SpO₂:</strong> ${triage.oxigeno}%</span>` : ''}
+          ${triage.dolor != null ? `<span><strong>Dolor:</strong> ${triage.dolor}/10</span>` : ''}
+        </div>
+      </div>
+    ` : '';
+
+    const fechaConsulta = new Date(cons.timestamp || Date.now()).toLocaleDateString('es-HN', {
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
+    const especialidad = this._activeCita?.especialidad || cons.especialidad || 'Consulta Médica';
+
     document.getElementById('receta-print-content').innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-        <div>
-          <h2 style="margin:0;color:#1e3a8a;">CLÍNICA MÉDICA SAN RAFAEL</h2>
-          <p style="margin:2px 0;font-size:.85rem;color:#666;">San Pedro Sula | Tel: 2550-1234</p>
-        </div>
-        <div style="text-align:right;">
-          <h3 style="margin:0;color:#475569;">RECETA MÉDICA</h3>
-          <p style="margin:2px 0;font-size:.8rem;">Fecha: ${new Date(cons.timestamp).toLocaleDateString()}</p>
-        </div>
-      </div>
-      <hr style="border:0;border-top:2px solid #1e3a8a;margin-bottom:20px;">
-      <div style="font-size:.9rem;margin-bottom:16px;">
-        <p><strong>Paciente:</strong> ${cons.pacienteNombre}</p>
-        <p><strong>Identidad:</strong> ${cons.pacienteDni}</p>
-        <p><strong>Médico:</strong> ${cons.medico}</p>
-        <p><strong>Diagnóstico (CIE-10):</strong> ${cons.diagnostico}</p>
-      </div>
-      <h4 style="border-bottom:1px solid #000;padding-bottom:4px;">PRESCRIPCIÓN</h4>
-      <table style="width:100%;border-collapse:collapse;font-size:.9rem;">
-        <thead>
-          <tr style="border-bottom:2px solid #ccc;text-align:left;">
-            <th style="padding:8px 0;">Medicamento</th>
-            <th style="padding:8px 0;">Dosis / Cantidad</th>
-            <th style="padding:8px 0;text-align:right;">Duración</th>
-          </tr>
-        </thead>
-        <tbody>${medsRows}</tbody>
-      </table>
-      ${examsSection}
-      <p style="margin-top:20px;font-size:.85rem;"><strong>Recomendaciones:</strong> ${cons.tratamiento}</p>
-      <div style="margin-top:60px;display:flex;justify-content:flex-end;padding-right:40px;">
-        <div style="text-align:center;width:220px;">
-          ${(() => {
-            try {
-              const empleados = JSON.parse(localStorage.getItem('sirec_empleados') || '[]');
-              const medicoNombre = (cons.medico || '').toLowerCase().trim();
-              const medico = empleados.find(e => {
-                const nombre = `${e.pnom || ''} ${e.snom || ''} ${e.pape || ''} ${e.sape || ''}`.toLowerCase().trim();
-                const nombreCorto = `${e.pnom || ''} ${e.pape || ''}`.toLowerCase().trim();
-                return nombre.includes(medicoNombre) || medicoNombre.includes(nombreCorto);
-              });
-              if (medico && medico.firma) {
-                return `<img src="${medico.firma}" alt="Firma" style="max-width:200px;max-height:80px;object-fit:contain;display:block;margin:0 auto 4px;">`;
-              }
-            } catch(e) {}
-            return '<div style="height:80px;"></div>';
-          })()}
-          <div style="border-top:1px solid #000;padding-top:6px;font-size:.8rem;">
-            ${cons.medico}<br>
-            <span style="font-size:.75rem;color:#666;">Médico Autorizado</span>
+      <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:720px;margin:0 auto;color:#1e293b;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:16px;border-bottom:3px solid #1e3a8a;">
+          <div>
+            <h2 style="margin:0;color:#1e3a8a;font-size:1.3rem;font-weight:800;">CLÍNICA MÉDICA SAN RAFAEL</h2>
+            <p style="margin:3px 0 0;font-size:.8rem;color:#64748b;">San Pedro Sula, Honduras | Tel: 2550-1234</p>
+            <p style="margin:2px 0 0;font-size:.78rem;color:#94a3b8;">www.clinicasanrafael.hn</p>
           </div>
+          <div style="text-align:right;">
+            <h3 style="margin:0;color:#475569;font-size:1rem;">RECETA MÉDICA</h3>
+            <p style="margin:3px 0 0;font-size:.8rem;">Fecha de consulta: <strong>${fechaConsulta}</strong></p>
+            <p style="margin:2px 0 0;font-size:.78rem;color:#64748b;">No. Cita: <strong>${cons.citaId || this._activeCita?.id || ''}</strong></p>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.9rem;margin-bottom:16px;padding:12px;background:#f0f9ff;border-radius:8px;border-left:4px solid #1e3a8a;">
+          <div>
+            <p style="margin:0 0 4px;"><strong>Paciente:</strong> ${cons.pacienteNombre}</p>
+            <p style="margin:0 0 4px;"><strong>Identidad:</strong> ${cons.pacienteDni}</p>
+          </div>
+          <div>
+            <p style="margin:0 0 4px;"><strong>Médico:</strong> ${cons.medico}</p>
+            <p style="margin:0 0 4px;"><strong>Especialidad:</strong> ${especialidad}</p>
+          </div>
+        </div>
+
+        ${vitalesSection}
+
+        <div style="margin-bottom:16px;font-size:.9rem;">
+          ${cons.motivo ? `<p style="margin:0 0 6px;"><strong>Motivo de Consulta:</strong> ${cons.motivo}</p>` : ''}
+          ${cons.sintomatologia ? `<p style="margin:0 0 6px;"><strong>Sintomatología:</strong> ${cons.sintomatologia}</p>` : ''}
+          ${cons.antecedentes ? `<p style="margin:0 0 6px;"><strong>Antecedentes:</strong> ${cons.antecedentes}</p>` : ''}
+          ${cons.diagnostico ? `<p style="margin:0 0 6px;"><strong>Diagnóstico (CIE-10):</strong> <span style="color:#1e3a8a;font-weight:600;">${cons.diagnostico}</span></p>` : ''}
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <h4 style="border-bottom:2px solid #1e3a8a;padding-bottom:5px;margin-bottom:8px;color:#1e3a8a;font-size:1rem;">
+            PRESCRIPCIÓN MÉDICA
+          </h4>
+          <table style="width:100%;border-collapse:collapse;font-size:.88rem;">
+            <thead>
+              <tr style="background:#1e3a8a;color:#fff;">
+                <th style="padding:8px 4px;text-align:left;">Medicamento</th>
+                <th style="padding:8px 4px;text-align:left;">Dosis</th>
+                <th style="padding:8px 4px;text-align:center;">Cantidad</th>
+                <th style="padding:8px 4px;text-align:right;">Duración</th>
+              </tr>
+            </thead>
+            <tbody>${medsRows}</tbody>
+          </table>
+        </div>
+
+        ${examsSection}
+
+        ${cons.tratamiento ? `
+        <div style="margin-top:16px;font-size:.9rem;">
+          <h4 style="border-bottom:1px solid #cbd5e1;padding-bottom:4px;margin-bottom:8px;color:#1e3a8a;">
+            RECOMENDACIONES / PLAN DE TRATAMIENTO
+          </h4>
+          <p style="margin:0;white-space:pre-wrap;line-height:1.6;">${cons.tratamiento}</p>
+        </div>` : ''}
+
+        <div style="margin-top:60px;display:flex;justify-content:flex-end;padding-right:40px;">
+          <div style="text-align:center;width:240px;">
+            ${(() => {
+              try {
+                const empleados = JSON.parse(localStorage.getItem('sirec_empleados') || '[]');
+                const medicoNombre = (cons.medico || '').toLowerCase().trim();
+                const medico = empleados.find(e => {
+                  const nombre = `${e.pnom || ''} ${e.snom || ''} ${e.pape || ''} ${e.sape || ''}`.toLowerCase().trim();
+                  const nombreCorto = `${e.pnom || ''} ${e.pape || ''}`.toLowerCase().trim();
+                  return nombre.includes(medicoNombre) || medicoNombre.includes(nombreCorto);
+                });
+                if (medico && medico.firma) {
+                  return `<img src="${medico.firma}" alt="Firma" style="max-width:200px;max-height:80px;object-fit:contain;display:block;margin:0 auto 4px;">`;
+                }
+              } catch(e) {}
+              return '<div style="height:80px;"></div>';
+            })()}
+            <div style="border-top:1px solid #1e293b;padding-top:8px;font-size:.85rem;">
+              <strong>${cons.medico}</strong><br>
+              <span style="font-size:.78rem;color:#64748b;">Médico Autorizado | ${especialidad}</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:30px;padding-top:10px;border-top:1px dashed #cbd5e1;text-align:center;font-size:.75rem;color:#94a3b8;">
+          Documento generado por SIREC — ${new Date().toLocaleDateString('es-HN')}
         </div>
       </div>
     `;
